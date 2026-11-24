@@ -1,6 +1,6 @@
 {
-  "name": "prism-framework",
-  "version": "0.7.3-dev",
+  "name": "lumina",
+  "version": "0.7.5",
   "description": "Node.js framework lol",
   "main": "index.js",
   "scripts": {
