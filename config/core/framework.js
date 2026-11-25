@@ -1,11 +1,11 @@
 /**
  * Framework level code lol
  */
+const { version } = require("../../package.json");
 
 module.exports = {
-
-    frameName: "Lumina ☆", // Unified Framework Name
-    frameVer: "0.7.5-dev", // Unified Framework version
+    frameName: "Lumina ☆", // Framework Name
+    frameVer: `${version}-dev`, // Version of the bot
     frameID: 24, // Framework version ID
     updateURL: "https://github.com/Nexint-Labs/Lumina/",
     updateSource: "https://raw.githubusercontent.com/Nexint-Labs/Lumina/refs/heads/main", // prolly dont change this unless you know what ur doing

@@ -1,6 +1,6 @@
 {
-  "name": "lumina",
-  "version": "0.7.5",
+  "name": "@nexint/lumina",
+  "version": "0.7.6",
   "description": "Node.js framework lol",
   "main": "index.js",
   "scripts": {
@@ -10,7 +10,7 @@
   "keywords": [],
   "author": "Nexint",
   "license": "UNLICENSED",
-  "private": true,
+  "private": false,
   "type": "commonjs",
   "exports": {
     ".": "./index.js",
