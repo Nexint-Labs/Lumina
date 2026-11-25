@@ -18,7 +18,8 @@
     "./core/*": "./functions/core/*.js",
     "./core/*.mjs": "./functions/core/*.mjs",
     "./framework": "./config/core/framework.js",
-    "./preload/*": "./preload/*.js"
+    "./preload/*": "./preload/*.js",
+    "./power": "./functions/core/powerCycle.js"
   },
   "imports": {
     "#config/*": "./config/*.js",

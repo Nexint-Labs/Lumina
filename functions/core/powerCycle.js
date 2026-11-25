@@ -1,8 +1,10 @@
+const { getConfig } = require("#functions/core/getConfig");
 const { clearDirectory } = require("./clearCache");
 const { date } = require("./date");
-const { close, refresh, load } = require("./load");
+const { close, refresh, load, health } = require("./load");
 const { log } = require("./log.mjs");
-const { root, frameworkDir, standalone } = require("#functions/core/dirs")
+const { root, frameworkDir, standalone } = require("#functions/core/dirs");
+const { errorPolicy } = getConfig("core/core");
 
 let shutDownState = null;
 let otherState = null;
@@ -14,7 +16,7 @@ let otherState = null;
  * @param {Boolean} exit 
  */
 const gracefulShutdown = async function (cause, exit) {
-    
+
     if (shutDownState) {
         await log.fatal(`Additional shutdown requested during active shutdown. Escalating to forced shutdown. Cause: ${cause}`, null, 0x0004, true);
         process.exit(1) // again, this shouldnt happen in any circumstance, but just a failsafe :)
@@ -206,9 +208,74 @@ const refreshCycle = async function (cause) {
     }
 }
 
+/**
+ * Health checker
+ * @param {String} cause 
+ * @param {Boolean} quiet // Quiet... Used for auto health checks.
+ * @returns 
+ */
+const healthCheck = async function (cause, quiet = false) {
+
+    // State machine
+    if (otherState || shutDownState) {
+        return false;
+    }
+    otherState = true;
+    try {
+        const startHealth = Date.now()
+
+        if (!quiet) {
+            log.info(`\x1b[36m---------------------- Health -----------------------\x1b[0m`)
+            log.event(`Health check triggered by: ${cause}`)
+        }
+
+        // Start refreshing
+        let success = true;
+        const healthDirs = ["apps", "preload"]
+
+        // Clear non framework dirs
+        for (const dir of healthDirs) {
+            if (!await health(dir, root)) {
+                success = false;
+            }
+        }
+
+        if (!standalone) {
+            if (!await health("preload", frameworkDir)) {
+                success = false;
+            }
+        }
+
+        // Determine success or not
+        if (!success) {
+            if (errorPolicy.healthPolicy == "warn") {
+                log.warn(`One or more components failed the heartbeat.`)
+            } else if (errorPolicy.healthPolicy !== "continue") {
+                await log.fatal("One or more components failed the heartbeat.", null, 0x0004, true);
+                process.exit(1);
+            }
+        } else if (!quiet) {
+            log.success(`Health check complete in ${(Date.now() - startHealth) / 1000}s!`)
+        }
+
+        // Cleanup
+
+        if (!quiet) {
+            log.info(`\x1b[36m--------------------- Nex ${date.getFullYear()} ---------------------\x1b[0m`)
+        }
+        otherState = false;
+        return success;
+    } catch (error) {
+        await log.fatal("An unexpected error has happened while checking health.", error, 0x0005, true)
+        process.exit(1);
+    }
+
+}
+
 module.exports = {
     gracefulShutdown,
     reload,
     refreshCycle,
+    healthCheck,
     persist: true
 }

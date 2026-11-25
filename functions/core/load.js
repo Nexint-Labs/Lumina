@@ -219,11 +219,42 @@ const refresh = async function (dir, root) {
     return success;
 }
 
+/**
+ * Ping pong execute the health script ping pong check if things are working!
+ * @param {String} dir 
+ * @param {String} [root] - Defaults to the working directory.
+ */
+const health = async function (dir, root) {
+
+    let healthy = true;
+
+    const healthHelper = async (plugin, file) => {
+        if ('health' in plugin) {
+            if (await plugin.health() !== true) {
+                healthy = false;
+                log.warn(`Unhealthy component: ${path.join(dir, file)}`);
+            } else if (verbose) {
+                log.info(`Checked health for file: ${path.join(dir, file)}`);
+            }
+        }
+    }
+
+    const { success } = await loadDirHelper(dir, healthHelper, {
+        root,
+        errorMessage: "Failed to ping pong app.",
+        fatal: false,
+        cachedOnly: true,
+    });
+
+    return success && healthy;
+}
+
 module.exports = {
     load,
     loadConsole,
     loadHelp,
     close,
     refresh,
-    queryFiles
+    queryFiles,
+    health
 }
