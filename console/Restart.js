@@ -13,8 +13,9 @@ const delay = require("#functions/core/delay");
 const { frameworkDir, standalone, root } = require("#functions/core/dirs");
 const { loadHelp } = require("#functions/core/load");
 const { log } = require('#functions/core/log.mjs');
-const { gracefulShutdown, refreshCycle, reload } = require('#functions/core/powerCycle');
+const { gracefulShutdown, refreshCycle, reload, healthCheck } = require('#functions/core/powerCycle');
 const { spawn } = require('child_process');
+const { gradient } = require('#functions/core/gradient');
 
 module.exports = {
     // Example of a help menu given by the bot.
@@ -27,12 +28,13 @@ module.exports = {
             '/h (page) - Mirror of /help.',
             'The help menu can be expanded upon by other plugins.',
             '/info (page) - Opens a neat info menu!',
-            'This function can\'t be expanded upon by other plugins.',
+            'Note: Info can\'t be expanded upon by other plugins.',
             '/reload - Reloads the entire app (nearly from scratch)',
             '/refresh - Refreshes commands, etc.',
-            '/restart - Restarts the bot. Recommended when updating.',
+            `/restart - Restarts ${frameName}. Recommended when updating.`,
+            '/health - Health checker',
             '/rs - Mirror of /restart',
-            '/stop - Closes bot.',
+            `/stop - Closes ${frameName}.`,
             '/end - Mirror of /stop.',
         ];
     },
@@ -60,11 +62,11 @@ module.exports = {
                 } else {
                     page = 1;
                 }
-                log.info(`\x1b[36m----------------- Help menu: (${page}/${Math.ceil((helpMenu.length) / 8)}) -----------------\x1b[0m`)
+                log.info(gradient(`----------------- Help menu: (${page}/${Math.ceil((helpMenu.length) / 8)}) -----------------`, "#00ffff", "#FF00FF"))
                 for (let i = (page - 1) * 8; i < Math.min(8 + ((page - 1) * 8), helpMenu.length); i++) {
                     log.info(helpMenu[i])
                 }
-                log.info(`\x1b[36m--------------------- Nex ${date.getFullYear()} ---------------------\x1b[0m`)
+                log.info(gradient(`--------------------- Nex ${date.getFullYear()} ---------------------`, "#00ffff", "#FF00FF"))
                 return true;
             case "/info":
                 let info;
@@ -73,7 +75,7 @@ module.exports = {
                     'The first number (X.0.0) is the major release.',
                     'The second number (0.X.0) is the minor release.',
                     'The third number (0.0.X) is the patch #.',
-                    'Breaking changes may occur between Prism 0.x releases.',
+                    `Breaking changes may occur between ${frameName} 0.x releases.`,
                     'Compatibility is not guaranteed until v1.0.0.',
                     'Built-in plugins aside from "built-in" are typically',
                     'not updated as often, and may be unstable.',
@@ -83,7 +85,7 @@ module.exports = {
                     'Dev is the dev instance, prod is the prod instance.',
                     'Disclaimers:',
                     'Third party plugins are not guaranteed to be supported.',
-                    'Prism is in active development and may introduce breaking changes.',
+                    `${frameName} is in active development and may introduce breaking changes.`,
                     'Have fun running this! - Nexint',
                 ];
                 if (command.split(" ")[1] != undefined) {
@@ -94,11 +96,11 @@ module.exports = {
                 } else {
                     info = 1;
                 }
-                log.info(`\x1b[36m----------------- Info menu: (${info}/${Math.ceil((infoList.length) / 8)}) -----------------\x1b[0m`)
+                log.info(gradient(`----------------- Info menu: (${info}/${Math.ceil((infoList.length) / 8)}) -----------------`, "#00ffff", "#FF00FF"))
                 for (let i = (info - 1) * 8; i < Math.min(8 + ((info - 1) * 8), infoList.length); i++) {
                     log.info(infoList[i])
                 }
-                log.info(`\x1b[36m--------------------- Nex ${date.getFullYear()} ---------------------\x1b[0m`)
+                log.info(gradient(`--------------------- Nex ${date.getFullYear()} ---------------------`, "#00ffff", "#FF00FF"))
                 return true;
             case "/end":
             case "/stop":
@@ -120,6 +122,9 @@ module.exports = {
                 return true;
             case "/reload":
                 await reload("Console // Reload")
+                return true;
+            case "/health":
+                await healthCheck("Console // Health", false)
                 return true;
             default:
                 return false;

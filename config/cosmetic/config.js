@@ -1,4 +1,4 @@
 module.exports = {
-    pluginName: "No apps installed",
+    pluginName: "N/A",
     pluginVer: "N/A"
 }

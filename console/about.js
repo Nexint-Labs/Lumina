@@ -4,6 +4,7 @@ const { pluginName, pluginVer } = getConfig("cosmetic/config");
 const { date } = require('#functions/core/date');
 const { log, getInfo, getSuccess, getWarn, getError, getFatal, getEvent } = require('#functions/core/log.mjs');
 const { getUpdateVersion } = require('#functions/core/update');
+const { gradient } = require('#functions/core/gradient');
 
 module.exports = {
     // Example of a help menu given by the bot.
@@ -29,7 +30,7 @@ module.exports = {
                 switch (print) {
                     case "v":
                     case 'version':
-                        log.info(`\x1b[36m------------------- Version Info -------------------\x1b[0m`)
+                        log.info(gradient(`------------------- Version Info -------------------`, "#00ffff", "#FF00FF"))
                         const [, latestVersion] = await getUpdateVersion() || [];
                         log.info("Printing the version...")
                         log.info(`${pluginName} Version: ${pluginVer}`)
@@ -43,19 +44,19 @@ module.exports = {
                         } else {
                             log.info(`Running the latest version.`)
                         }
-                        log.info(`\x1b[36m--------------------- Nex ${date.getFullYear()} ---------------------\x1b[0m`)
+                        log.info(gradient(`--------------------- Nex ${date.getFullYear()} ---------------------`, "#00ffff", "#FF00FF"))
                         break;
                     case "b":
                     case 'build':
-                        log.info(`\x1b[36m-------------------- Build Info --------------------\x1b[0m`)
+                        log.info(gradient(`-------------------- Build Info --------------------`, "#00ffff", "#FF00FF"))
                         log.info(`Printing the build!`)
                         log.info(`${pluginName} v${pluginVer}`)
                         log.info(`${frameName} v${frameVer}`)
-                        log.info(`\x1b[36m--------------------- Nex ${date.getFullYear()} ---------------------\x1b[0m`)
+                        log.info(gradient(`--------------------- Nex ${date.getFullYear()} ---------------------`, "#00ffff", "#FF00FF"))
                         break;
                     case 'l':
                     case 'logs':
-                        log.info(`\x1b[36m--------------------- Log Info ---------------------\x1b[0m`)
+                        log.info(gradient(`--------------------- Log Info ---------------------`, "#00ffff", "#FF00FF"))
                         log.info(`${getInfo() + getSuccess() + getWarn() + getError() + getFatal() + getEvent()} total events.`)
                         log.info(`${getInfo() - 1} info events.`)
                         log.info(`${getSuccess()} successful events.`)
@@ -63,7 +64,7 @@ module.exports = {
                         log.info(`${getError()} error events.`)
                         log.info(`${getFatal()} fatal events.`)
                         log.info(`${getEvent()} general events.`)
-                        log.info(`\x1b[36m--------------------- Nex ${date.getFullYear()} ---------------------\x1b[0m`)
+                        log.info(gradient(`--------------------- Nex ${date.getFullYear()} ---------------------`, "#00ffff", "#FF00FF"))
                         break;
                     default:
                         log.info(`Not a valid argument.`)
@@ -71,7 +72,7 @@ module.exports = {
                         log.info(`version - Prints version info`)
                         log.info(`build - Prints ${frameName} build`)
                         log.info(`logs - Prints the log events.`)
-                        log.info(`\x1b[36m--------------------- Nex ${date.getFullYear()} ---------------------\x1b[0m`)
+                        log.info(gradient(`--------------------- Nex ${date.getFullYear()} ---------------------`, "#00ffff", "#FF00FF"))
                 }
                 return true;
             default:

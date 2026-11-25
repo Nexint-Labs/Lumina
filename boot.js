@@ -161,11 +161,12 @@ const main = async () => {
     // This makes my API super modular :)
     await load("apps", root);
 
-    log.info(`\x1b[36m--------------------- Nex ${date.getFullYear()} ---------------------\x1b[0m`)
-    log.info(`                 ${gradient(`Welcome to ${frameName}!`, "#FF66CC", "#66CCFF")}                 `);
+    log.info(gradient(`--------------------- Nex ${date.getFullYear()} ---------------------`, "#00ffff", "#FF00FF"))
+    log.info(`                ${gradient(`Welcome to ${frameName}!`, "#FF66CC", "#66CCFF")}                  `);
     log.info(`             You're running version: ${frameVer}             `);
     log.info("        Stay up to date for the best features.        ");
-    log.info('\x1b[36m----------------------------------------------------\x1b[0m');
+    log.info("              Run /help to get started!               ");
+    log.info(gradient(`----------------------------------------------------`, "#00ffff", "#FF00FF"));
     const elapsed = performance.now() - start;
 
     if (elapsed < 1000) {
@@ -173,6 +174,7 @@ const main = async () => {
     } else {
         log.success(`Done in ${(elapsed / 1000).toFixed(3)} seconds!`);
     }
+    
     print("Server is running.")
 
     await updateCheck(true)

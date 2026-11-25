@@ -2,7 +2,7 @@ const assert = require("node:assert/strict");
 const { log } = require("#functions/core/log.mjs");
 
 /**
- * Sample test for Prism's testing infrastructure.
+ * Sample test lol
  */
 const execute = async function () {
 

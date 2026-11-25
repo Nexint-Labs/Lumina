@@ -4,10 +4,14 @@ const { date } = require("./date");
 const { close, refresh, load, health } = require("./load");
 const { log } = require("./log.mjs");
 const { root, frameworkDir, standalone } = require("#functions/core/dirs");
+const { frameName } = require("#config/core/framework");
+const { gradient } = require("./gradient");
 const { errorPolicy } = getConfig("core/core");
+const { pluginName } = getConfig("cosmetic/config");
 
 let shutDownState = null;
 let otherState = null;
+let healthState = false;
 
 /**
  * Graceful Shutdown of bot
@@ -29,7 +33,7 @@ const gracefulShutdown = async function (cause, exit) {
     shutDownState = true;
 
     try {
-        log.info(`\x1b[36m--------------------- Nex ${date.getFullYear()} ---------------------\x1b[0m`)
+        log.info(gradient(`--------------------- Nex ${date.getFullYear()} ---------------------`, "#00ffff", "#FF00FF"))
         log.event(`Shutdown triggered by: ${cause}`)
         log.event("Closing all apps...")
         let success = true;
@@ -58,7 +62,7 @@ const gracefulShutdown = async function (cause, exit) {
             log.event("All components closed successfully.");
         }
         log.event("Shutting down.")
-        log.info(`\x1b[36m----------------------------------------------------\x1b[0m`)
+        log.info(gradient(`----------------------------------------------------`, "#00ffff", "#FF00FF"))
         shutDownState = false;
         if (exit) {
             if (success) {
@@ -87,7 +91,7 @@ const reload = async function (cause) {
     }
     otherState = true;
     try {
-        log.info(`\x1b[36m---------------------- Reload ----------------------\x1b[0m`)
+        log.info(gradient(`---------------------- Reload ----------------------`, "#00ffff", "#FF00FF"))
         const startReload = Date.now()
         log.event(`Reload triggered by: ${cause}`)
 
@@ -114,7 +118,7 @@ const reload = async function (cause) {
 
         // Determine if successful
         if (!success) {
-            await log.fatal("One or more components failed to close.", null, 0x0003, true);
+            await log.fatal(`One or more components failed to close.`, null, 0x0003, true);
             process.exit(1) // again, this shouldnt happen in any circumstance, but just a failsafe :)
         } else {
             log.success("Apps have been taken temporarily offline.");
@@ -150,7 +154,7 @@ const reload = async function (cause) {
         await load("apps", root);
         log.success(`Reload complete in ${(Date.now() - startReload) / 1000}s!`)
         log.warn("Note: Reloading is unstable and not explicitly supported. If things don't work, restart.")
-        log.info(`\x1b[36m--------------------- Nex ${date.getFullYear()} ---------------------\x1b[0m`)
+        log.info(gradient(`--------------------- Nex ${date.getFullYear()} ---------------------`, "#00ffff", "#FF00FF"))
         otherState = false;
         return true;
     } catch (error) {
@@ -171,7 +175,7 @@ const refreshCycle = async function (cause) {
     }
     otherState = true;
     try {
-        log.info(`\x1b[36m------------------- Refresh real --------------------\x1b[0m`)
+        log.info(gradient(`------------------- Refresh real --------------------`, "#00ffff", "#FF00FF"))
         const startRefresh = Date.now()
         log.event(`Refresh triggered by: ${cause}`)
 
@@ -199,7 +203,7 @@ const refreshCycle = async function (cause) {
 
         // Cleanup
         log.warn("Note: Refreshing is unstable and not explicitly supported. If things don't work, restart or reload.")
-        log.info(`\x1b[36m--------------------- Nex ${date.getFullYear()} ---------------------\x1b[0m`)
+        log.info(gradient(`--------------------- Nex ${date.getFullYear()} ---------------------`, "#00ffff", "#FF00FF"))
         otherState = false;
         return true;
     } catch (error) {
@@ -216,54 +220,73 @@ const refreshCycle = async function (cause) {
  */
 const healthCheck = async function (cause, quiet = false) {
 
-    // State machine
-    if (otherState || shutDownState) {
+    // state machine
+    if (otherState || shutDownState || healthState) {
         return false;
     }
-    otherState = true;
+
+    healthState = true;
+
     try {
         const startHealth = Date.now()
 
         if (!quiet) {
-            log.info(`\x1b[36m---------------------- Health -----------------------\x1b[0m`)
+            log.info(gradient(`---------------------- Health -----------------------`, "#00ffff", "#FF00FF"))
             log.event(`Health check triggered by: ${cause}`)
         }
 
-        // Start refreshing
-        let success = true;
+        // Start the health checker!
+        let internalSuccess = true;
+        let externalSuccess = true;
         const healthDirs = ["apps", "preload"]
 
-        // Clear non framework dirs
-        for (const dir of healthDirs) {
-            if (!await health(dir, root)) {
-                success = false;
-            }
-        }
-
+        // Health of internal framework
         if (!standalone) {
             if (!await health("preload", frameworkDir)) {
-                success = false;
+                internalSuccess = false;
             }
         }
 
         // Determine success or not
-        if (!success) {
+        if (!internalSuccess) {
             if (errorPolicy.healthPolicy == "warn") {
-                log.warn(`One or more components failed the heartbeat.`)
+                log.warn(`One or more ${frameName} components failed the heartbeat.`)
             } else if (errorPolicy.healthPolicy !== "continue") {
-                await log.fatal("One or more components failed the heartbeat.", null, 0x0004, true);
+                await log.fatal(`One or more ${frameName} components failed the heartbeat.`, null, 0x0004, true);
                 process.exit(1);
             }
-        } else if (!quiet) {
-            log.success(`Health check complete in ${(Date.now() - startHealth) / 1000}s!`)
+        }
+
+        // Health of external apps lol
+        for (const dir of healthDirs) {
+            if (!await health(dir, root)) {
+                externalSuccess = false;
+            }
+        }
+
+        // Determine success or not
+        if (!externalSuccess) {
+            if (errorPolicy.healthPolicy == "warn") {
+                log.warn(`One or more ${pluginName} components failed the heartbeat.`)
+            } else if (errorPolicy.healthPolicy !== "continue") {
+                await log.fatal(`One or more ${pluginName} components failed the heartbeat.`, null, 0x0004, true);
+                process.exit(1);
+            }
+        }
+
+        const success = internalSuccess && externalSuccess;
+
+        // Determine success or not
+        if (success && !quiet) {
+            log.success(`Health check complete in ${(Date.now() - startHealth) / 1000}s!`);
         }
 
         // Cleanup
 
         if (!quiet) {
-            log.info(`\x1b[36m--------------------- Nex ${date.getFullYear()} ---------------------\x1b[0m`)
+            log.info(gradient(`--------------------- Nex ${date.getFullYear()} ---------------------`, "#00ffff", "#FF00FF"))
         }
-        otherState = false;
+        healthState = false
         return success;
     } catch (error) {
         await log.fatal("An unexpected error has happened while checking health.", error, 0x0005, true)
