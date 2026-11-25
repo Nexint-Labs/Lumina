@@ -1,6 +1,6 @@
 const { log } = require("./log.mjs");
 
-const { frameVer, frameID, updateURL, frameName, updateSource } = require('#config/core/core');
+const { frameName, frameVer, frameID, updateSource, updateURL } = require('#config/core/framework');
 
 /**
  * Gets the latest version of this bot!

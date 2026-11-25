@@ -1,8 +1,9 @@
-const { logDir } = require("#config/core/log");
+const { getConfig } = require("#functions/core/getConfig");
+const { logDir } = getConfig("core/log");
 const fs = require("node:fs");
 const path = require("node:path");
 const { log, forceShutdown } = require("../../functions/core/fatalShutdown.mjs");
-const { frameName } = require("#config/core/core");
+const { frameName } = require("#config/core/framework");
 
 let logFormat = process.env.PRISM_LOG_FORMAT;
 

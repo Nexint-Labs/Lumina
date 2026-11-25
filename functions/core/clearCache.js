@@ -1,4 +1,5 @@
-const { verbose } = require("#config/core/core");
+const { getConfig } = require("#functions/core/getConfig");
+const { verbose } = getConfig("core/core");
 const path = require("node:path");
 const { log } = require("./log.mjs");
 

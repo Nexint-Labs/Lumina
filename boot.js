@@ -18,8 +18,9 @@ try {
     if (error.code !== "ENOENT") throw error;
 }
 
-
-const { logFormat } = require('#config/core/log');
+// Load configs (that actually matter)
+const { getConfig } = require("#functions/core/getConfig");
+const { logFormat } = getConfig("core/log");
 
 if (!process.env.PRISM_LOG_FORMAT) {
     process.env.PRISM_LOG_FORMAT = logFormat
@@ -27,9 +28,8 @@ if (!process.env.PRISM_LOG_FORMAT) {
 const { log } = require('#functions/core/log.mjs');
 
 log.event(`Loading configs...`)
-
-// Load configs (that actually matter)
-const { frameVer, autoUpdate, frameName, errorPolicy } = require('#config/core/core');
+const { autoUpdate, errorPolicy } = getConfig("core/core");
+const { frameVer, frameName } = require('#config/core/framework');
 const { load, loadConsole } = require('#functions/core/load');
 const delay = require("#functions/core/delay");
 

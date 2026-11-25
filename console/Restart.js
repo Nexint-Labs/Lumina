@@ -4,8 +4,10 @@ const { restart } = require('../../config.js');
 const { helpMenu, readline, spawn, exitHandler, server } = require('../../index.js');
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 */
-const { restart, frameName } = require("#config/core/core");
-const { pluginName } = require("#config/cosmetic/config");
+const { frameName } = require('#config/core/framework');
+const { getConfig } = require("#functions/core/getConfig");
+const { restart } = getConfig("core/core");
+const { pluginName } = getConfig("cosmetic/config");
 const { date } = require("#functions/core/date");
 const delay = require("#functions/core/delay");
 const { frameworkDir, standalone, root } = require("#functions/core/dirs");

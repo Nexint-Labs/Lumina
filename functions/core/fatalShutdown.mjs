@@ -1,6 +1,7 @@
 import { styleText } from "node:util";
 import dateCore from "./date.js";
-import dateOptionsCore from "#config/core/core";
+import config from "#functions/core/getConfig";
+import framework from "#config/core/framework";
 import fs from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
@@ -9,7 +10,10 @@ import dirs from "#functions/core/dirs";
 const { root, frameworkDir, standalone } = dirs;
 
 const require = createRequire(import.meta.url);
-const { dateOptions, verbose, frameName } = dateOptionsCore;
+
+const { getConfig } = config;
+const { dateOptions, verbose } = getConfig("core/core");
+const { frameName } = framework;
 const { date } = dateCore;
 const DateFormatter = new Intl.DateTimeFormat(undefined, dateOptions)
 const SHUTDOWN_TIMEOUT = 5000;

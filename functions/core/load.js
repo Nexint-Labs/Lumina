@@ -1,7 +1,8 @@
 const fs = require("node:fs");
 const path = require('path');
 const { log } = require("./log.mjs");
-const { verbose, errorPolicy } = require("#config/core/core");
+const { getConfig } = require("#functions/core/getConfig");
+const { verbose, errorPolicy } = getConfig("core/core");
 const { forceShutdown } = require("./fatalShutdown.mjs");
 
 /**

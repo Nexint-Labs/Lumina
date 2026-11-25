@@ -184,23 +184,7 @@ const refreshCycle = async function (cause) {
         }
 
         log.success(`Cleared ${cleared} files!`)
-        let success = true;
-        let dirs = ["apps"];
-
-        // Refresh
-        for (const dir of dirs) {
-            if (!await refresh(dir, root)) {
-                success = false
-            }
-        }
-
-        if (!standalone) {
-            for (const dir of dirs) {
-                if (!await refresh(dir, root)) {
-                    success = false
-                }
-            }
-        }
+        const success = await refresh("apps", root);
 
         // Determine success or not
         if (!success) {

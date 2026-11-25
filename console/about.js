@@ -1,5 +1,6 @@
-const { frameName, frameVer, frameID } = require('#config/core/core');
-const { pluginName, pluginVer } = require('#config/cosmetic/config');
+const { frameName, frameVer, frameID } = require('#config/core/framework');
+const { getConfig } = require("#functions/core/getConfig");
+const { pluginName, pluginVer } = getConfig("cosmetic/config");
 const { date } = require('#functions/core/date');
 const { log, getInfo, getSuccess, getWarn, getError, getFatal, getEvent } = require('#functions/core/log.mjs');
 const { getUpdateVersion } = require('#functions/core/update');

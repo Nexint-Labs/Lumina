@@ -1,8 +1,9 @@
-import core from "#config/core/core";
+import config from "#functions/core/getConfig";
+const { getConfig } = config;
+const { dateOptions } = getConfig("core/core");
 import { styleText, inspect } from "node:util";
 import { forceShutdown } from "./fatalShutdown.mjs";
 import { writeLogFile } from "#preload/core/fileLog";
-const { dateOptions } = core;
 const DateFormatter = new Intl.DateTimeFormat(undefined, dateOptions)
 let infoCount = 0;
 let successCount = 0;
