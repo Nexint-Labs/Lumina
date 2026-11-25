@@ -16,6 +16,15 @@ const clearDirectory = function (dir, root = process.cwd()) {
         const relative = path.relative(root, filename);
 
         if (relative.startsWith(dir + path.sep)) {
+
+            // Preserve persistent modules
+            if (require.cache[filename]?.exports?.persist === true) {
+                if (verbose) {
+                    log.info(`Preserved cache for ${filename}`);
+                }
+                continue;
+            }
+            
             delete require.cache[filename];
 
             if (verbose) {

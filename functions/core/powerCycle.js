@@ -14,6 +14,7 @@ let otherState = null;
  * @param {Boolean} exit 
  */
 const gracefulShutdown = async function (cause, exit) {
+    
     if (shutDownState) {
         await log.fatal(`Additional shutdown requested during active shutdown. Escalating to forced shutdown. Cause: ${cause}`, null, 0x0004, true);
         process.exit(1) // again, this shouldnt happen in any circumstance, but just a failsafe :)
@@ -208,5 +209,6 @@ const refreshCycle = async function (cause) {
 module.exports = {
     gracefulShutdown,
     reload,
-    refreshCycle
+    refreshCycle,
+    persist: true
 }

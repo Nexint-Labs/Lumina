@@ -202,8 +202,8 @@ const close = async function (dir, root) {
 const refresh = async function (dir, root) {
 
     const refreshHelper = async (plugin, file) => {
-        if ('reload' in plugin) {
-            await plugin.reload();
+        if ('refresh' in plugin) {
+            await plugin.refresh();
 
             if (verbose) {
                 log.info(`Refreshed file: ${path.join(dir, file)}`);

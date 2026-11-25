@@ -1,11 +1,12 @@
 {
   "name": "@nexint/lumina",
-  "version": "0.7.7",
+  "version": "0.7.8",
   "description": "Node.js framework lol",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "node --test"
+    "test": "node --test",
+    "publish:dev": "npm version patch --no-git-tag-version && git add -A && git commit -m \"Development release\" && git push origin dev && npm publish --tag dev"
   },
   "keywords": [],
   "author": "Nexint",
