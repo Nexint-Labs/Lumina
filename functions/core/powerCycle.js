@@ -2,6 +2,7 @@ const { clearDirectory } = require("./clearCache");
 const { date } = require("./date");
 const { close, refresh, load } = require("./load");
 const { log } = require("./log.mjs");
+const { root, frameworkDir, standalone } = require("#functions/core/dirs")
 
 let shutDownState = null;
 let otherState = null;
@@ -30,11 +31,23 @@ const gracefulShutdown = async function (cause, exit) {
         log.event("Closing all apps...")
         let success = true;
         let dirs = ["apps", "plugins", "preload"];
+
+        // Close Apps
         for (const dir of dirs) {
-            if (!await close(dir)) {
+            if (!await close(dir, root)) {
                 success = false
             }
         }
+
+        // Close Framework
+        if (!standalone) {
+            for (const dir of dirs) {
+                if (!await close(dir, frameworkDir)) {
+                    success = false
+                }
+            }
+        }
+
         if (!success) {
             log.error("One or more components failed to close.");
         } else {
@@ -77,9 +90,20 @@ const reload = async function (cause) {
         // Closes apps and plugins
         let success = true;
         let dirs = ["apps", "plugins"];
+
+        // Reload App Dirs
         for (const dir of dirs) {
-            if (!await close(dir)) {
+            if (!await close(dir, root)) {
                 success = false
+            }
+        }
+
+        // Reload Framework
+        if (!standalone) {
+            for (const dir of dirs) {
+                if (!await close(dir, frameworkDir)) {
+                    success = false
+                }
             }
         }
 
@@ -93,14 +117,31 @@ const reload = async function (cause) {
 
         let cleared = 0;
         const clearedDirs = ["apps", "plugins", "functions", "test", "config", "console"]
+
+        // Clear non framework dirs
+        // Sidenote: This shouldn't technically need an order lol
         for (const dir of clearedDirs) {
-            cleared += clearDirectory(dir)
+            cleared += clearDirectory(dir, root)
         }
+
+        // Clear framework dirs
+        if (!standalone) {
+            for (const dir of clearedDirs) {
+                cleared += clearDirectory(dir, frameworkDir)
+            }
+        }
+
         log.success(`Cleared ${cleared} files!`)
 
-        // Load apps and plugins
-        await load("plugins");
-        await load("apps");
+        // Load Framework
+        await load("plugins", frameworkDir);
+        await load("apps", frameworkDir);
+
+        // Load Apps
+        if (!standalone) {
+            await load("plugins", root);
+            await load("apps", root);
+        }
         log.success(`Reload complete in ${(Date.now() - startReload) / 1000}s!`)
         log.warn("Note: Reloading is unstable and not explicitly supported. If things don't work, restart.")
         log.info(`\x1b[36m--------------------- Nex ${date.getFullYear()} ---------------------\x1b[0m`)
@@ -132,15 +173,35 @@ const refreshCycle = async function (cause) {
 
         let cleared = 0;
         const clearedDirs = ["functions", "config", "console"]
+
+        // Clear non framework dirs
         for (const dir of clearedDirs) {
-            cleared += clearDirectory(dir)
+            cleared += clearDirectory(dir, root)
         }
+
+        // Clear framework dirs
+        if (!standalone) {
+            for (const dir of clearedDirs) {
+                cleared += clearDirectory(dir, frameworkDir)
+            }
+        }
+        
         log.success(`Cleared ${cleared} files!`)
         let success = true;
         let dirs = ["apps"];
+
+        // Refresh
         for (const dir of dirs) {
-            if (!await refresh(dir)) {
+            if (!await refresh(dir, root)) {
                 success = false
+            }
+        }
+
+        if (!standalone) {
+            for (const dir of dirs) {
+                if (!await refresh(dir, root)) {
+                    success = false
+                }
             }
         }
 

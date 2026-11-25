@@ -1,6 +1,6 @@
 const { log } = require("./log.mjs");
 
-const { frameVer, autoUpdate, frameID, updateURL, frameName, errorPolicy, updateSource } = require('#config/core/core');
+const { frameVer, frameID, updateURL, frameName, updateSource } = require('#config/core/core');
 
 /**
  * Gets the latest version of this bot!
@@ -8,18 +8,25 @@ const { frameVer, autoUpdate, frameID, updateURL, frameName, errorPolicy, update
  */
 const getUpdateVersion = async function () {
     try {
+        // Update Versions
         const update = await fetch(updateSource + "/ver.txt");
         if (!update.ok) {
             throw new Error(`HTTP ${update.status}: ${update.statusText}`);
         }
+
+        // Update Version
         const updateName = await fetch(updateSource + "/verName.txt");
-        if (!update.ok) {
+        if (!updateName.ok) {
             throw new Error(`HTTP ${update.status}: ${update.statusText}`);
         }
+
+        // Get the actual versions lol
         const tmp = await update.text();
         const version = Number(tmp)
         const result = await updateName.text();
         const versionName = result
+
+        // isNan?
         if (!Number.isNaN(version)) {
             return [versionName, version]
         } else {
@@ -42,7 +49,7 @@ const getUpdateVersion = async function () {
 const updateCheck = async function (initial) {
     const check = await getUpdateVersion();
     if (!check) {
-        log.error("Something went wrong updating Prism!")
+        log.error(`Something went wrong updating ${frameName}!`)
         return;
     }
     const [versionName, latestVersion] = check
@@ -55,7 +62,7 @@ const updateCheck = async function (initial) {
         }
         log.warn(`Current version: v${frameVer} / Latest Version: ${versionName}`)
     } else if (latestVersion <= 0) {
-        log.warn("This instance of Prism cannot reliably connect to the internet.")
+        log.warn(`This instance of ${frameName} is fetching an invalid version.`)
     } else if (frameID > latestVersion) {
         log.warn(`You're running an experimental version of ${frameName}! (You are ${frameID - latestVersion} commits ahead)`)
         log.warn(`Here be dragons!~`)

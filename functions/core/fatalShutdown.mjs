@@ -1,5 +1,4 @@
-
-import chalk from "chalk";
+import { styleText } from "node:util";
 import dateCore from "./date.js";
 import dateOptionsCore from "#config/core/core";
 import fs from "node:fs";
@@ -7,7 +6,7 @@ import path from "node:path";
 import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
-const { dateOptions, verbose } = dateOptionsCore
+const { dateOptions, verbose, frameName } = dateOptionsCore;
 const { date } = dateCore;
 const DateFormatter = new Intl.DateTimeFormat(undefined, dateOptions)
 const SHUTDOWN_TIMEOUT = 5000;
@@ -29,7 +28,15 @@ const log = {
      * @param {Error} error 
      */
     error: function (text, error) {
-        console.error(chalk.redBright(`[ERROR] [${DateFormatter.format(Date.now())}] ${text}`));
+
+        const messages = [
+            `[ERROR] [${DateFormatter.format(Date.now())}] ${text}`,
+        ]
+
+        for (const message of messages) {
+            console.error(styleText("redBright", message))
+        }
+
         if (error) {
             console.error(error)
         }
@@ -40,7 +47,14 @@ const log = {
      * @param {String} text 
      */
     event: function (text) {
-        console.log(chalk.blueBright(`[EVENT] [${DateFormatter.format(Date.now())}] ${text}`))
+
+        const messages = [
+            `[EVENT] [${DateFormatter.format(Date.now())}] ${text}`,
+        ]
+
+        for (const message of messages) {
+            console.log(styleText("blueBright", message))
+        }
     },
 }
 
@@ -127,7 +141,7 @@ const forceShutdown = async function (cause) {
             log.event("All components closed successfully.");
         }
     } catch (error) {
-        log.error("Prism could not be force shut down properly.", error)
+        log.error(`${frameName} could not be force shut down properly.`, error)
         process.exit(1);
     }
     log.event("Shutting down.")

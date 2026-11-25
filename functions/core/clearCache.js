@@ -5,13 +5,14 @@ const { log } = require("./log.mjs");
 /**
  * clear directory lol
  * @param {String} dir 
+ * @param {String} Root
  * @returns 
  */
-const clearDirectory = function (dir) {
+const clearDirectory = function (dir, root = process.cwd()) {
     let cleared = 0;
 
     for (const filename of Object.keys(require.cache)) {
-        const relative = path.relative(process.cwd(), filename);
+        const relative = path.relative(root, filename);
 
         if (relative.startsWith(dir + path.sep)) {
             delete require.cache[filename];

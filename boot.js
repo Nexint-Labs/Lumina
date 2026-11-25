@@ -1,8 +1,23 @@
+// Configure root directories
+const { root, frameworkDir, standalone } = require("#functions/core/dirs")
+
 // Import the .env lol
-const env = require('dotenv').config({
-    path: __dirname + '/.env',
-    quiet: true
-});
+const { loadEnvFile } = require("node:process");
+const { parseEnv } = require("node:util");
+const fs = require('node:fs');
+const path = require('path');
+
+let envCount;
+
+try {
+    loadEnvFile(path.join(root, ".env"));
+    envCount = Object.keys(
+        parseEnv(fs.readFileSync(path.join(root, ".env"), "utf8"))
+    ).length;
+} catch (error) {
+    if (error.code !== "ENOENT") throw error;
+}
+
 
 const { logFormat } = require('#config/core/log');
 
@@ -25,6 +40,7 @@ const { gracefulShutdown } = require('#functions/core/powerCycle');
 
 // Prepare the console
 const readline = require('node:readline');
+const { gradient } = require("#functions/core/gradient");
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
@@ -43,7 +59,6 @@ module.exports = {
     consoleOpen,
     startLoad,
     readline: rl,
-    sourceDir: __dirname,
 }
 
 // Process.on random unhandled stuff
@@ -83,30 +98,21 @@ process.on("unhandledRejection", async (error, origin) => {
 const init = async function () {
 
     log.event("Loading directories...")
-    if (env.error) {
-        await log.fatal("No .env file exists. Please make it!", env.error, 0x0000, true);
-        process.exit(1); // this shouldnt run but i have it
+    if (envCount === undefined) {
+        log.warn("No .env file exists. You should probably make one! (Non-Fatal)");
     } else {
-        log.event(`${Object.keys(env.parsed ?? {}).length} envs loaded!`)
-    };
-
-    // Set the directory
-    try {
-        process.chdir(__dirname);
-    } catch (error) {
-        await log.fatal("Could not set the directory.", error, 0x0000, true);
-        process.exit(1); // this shouldnt run but i have it
+        log.event(`${envCount} envs loaded!`)
     };
 
     // Make sure directories exist lol
-    const fs = require('node:fs');
-    const path = require('path');
     const dirs = ["plugins", "preload", "console", "databases", "apps", "functions", "logs", "test"];
     dirs.forEach((dir) => {
-        if (!fs.existsSync(dir)) {
-            log.info(`Creating directory: ${dir}`);
-            fs.mkdirSync(path.join(__dirname, dir));
-        };
+        const dirPath = path.join(root, dir);
+
+        if (!fs.existsSync(dirPath)) {
+            log.event(`Creating directory: ${dir}`);
+            fs.mkdirSync(dirPath, { recursive: true });
+        }
     });
 
     // Windows specific patch im ticked off bro
@@ -140,16 +146,22 @@ const main = async () => {
 
     log.event("Loading files...")
 
-    // Load preload and plugins
-    await load("preload");
-    await load("plugins");
+    // Load framework preloads + plugins
+    await load("preload", frameworkDir);
+    await load("plugins", frameworkDir);
+
+    // Load application preloads + plugins
+    if (!standalone) {
+        await load("preload", root);
+        await load("plugins", root);
+    }
 
     // Load the apps (FINALLY?)
     // This makes my API super modular :)
-    await load("apps");
+    await load("apps", root);
 
     log.info(`\x1b[36m--------------------- Nex ${date.getFullYear()} ---------------------\x1b[0m`)
-    log.info(`                 Welcome to ${frameName}!                 `);
+    log.info(`                 ${gradient(`Welcome to ${frameName}!`, "#FF66CC", "#66CCFF")}                 `);
     log.info(`             You're running version: ${frameVer}             `);
     log.info("        Stay up to date for the best features.        ");
     log.info('\x1b[36m----------------------------------------------------\x1b[0m');
@@ -192,16 +204,21 @@ const asyncFunctions = async function () {
  */
 const commandParser = async () => {
     while (consoleOpen) {
-        const command = await prompt('');
+        const command = await prompt('> ');
 
-        // Is this command valid?
-        if (!(await loadConsole("console", command))) {
-            log.info("This command is not valid.")
+        // why am i doing this
+        if (!(await loadConsole("console", command, frameworkDir))) {
+            if (standalone || !(await loadConsole("console", command, root))) {
+                log.info("This command is not valid.")
+            }
         }
     }
 }
 
-// Update checks - Asyncronously checks updates.
+/**
+ * Update Checker
+ * Checks updates lol
+ */
 const autoUpdateCheck = async () => {
     while (consoleOpen) {
         await delay(3600000); // artificial delay to ensure host's CPU doesn't die

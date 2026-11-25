@@ -4,44 +4,88 @@ const { log } = require("./log.mjs");
 const { verbose, errorPolicy } = require("#config/core/core");
 const { forceShutdown } = require("./fatalShutdown.mjs");
 
+/**
+ * helper lol
+ * @param {String} dir 
+ * @param {Function} func 
+ * @param {Object} [options]
+ * @param {String} [options.root=process.cwd()]
+ * @param {Boolean} [options.cachedOnly=false]
+ * @param {Boolean} [options.fatal=true]
+ * @param {String} [options.errorMessage]
+ */
+const loadDirHelper = async function (dir, func, { root = process.cwd(), cachedOnly = false, fatal = true, errorMessage = "Failed to load files." } = {}) {
+
+    let success = true;
+
+    const dirPath = path.join(root, dir);
+
+    const files = fs.readdirSync(dirPath, { recursive: true });
+    for (const file of files) {
+
+        // Only load JS files (trust)
+        if ([".js", ".cjs", ".mjs"].includes(path.extname(file).toLowerCase())) {
+            const filePath = path.join(dirPath, file);
+
+            // Execute the plugin?
+            try {
+                let plugin;
+
+                // Load only pre-existing cached files.
+                if (cachedOnly) {
+                    const filename = require.resolve(filePath);
+                    const cached = require.cache[filename];
+
+                    if (!cached || !cached.loaded) continue;
+
+                    plugin = cached.exports;
+                } else {
+                    plugin = require(filePath);
+                }
+
+                // good question
+                if (await func(plugin, file) === true) {
+                    return { success, stopped: true };
+                }
+            } catch (error) {
+                success = false;
+
+                if (errorPolicy.uncaughtException === "continue") {
+                    continue;
+                }
+
+                log.error(errorMessage);
+                log.error(`Problematic file: ${filePath}`, error);
+
+                if (fatal && errorPolicy.uncaughtException !== "warn") {
+                    await forceShutdown(errorMessage);
+                }
+            }
+        }
+    }
+
+    return { success, stopped: false };
+}
 
 /**
  * Find files
  * This runs the execute function.
  * @param {String} dir 
+ * @param {String} [root] - Defaults to the working directory.
  * @returns
  */
-const queryFiles = async function (dir) {
+const queryFiles = async function (dir, root) {
+
     let count = 0;
 
-    const files = fs.readdirSync(path.join(process.cwd(), dir), { recursive: true });
-    for (const file of files) {
-
-        // Only load JS files (trust)
-        if ([".js", ".cjs", ".mjs"].includes(path.extname(file).toLowerCase())) {
-
-            // Execute the plugin?
-            try {
-                const plugin = require(path.join(process.cwd(), dir, file));
-                if ('execute' in plugin || 'command' in plugin) { // Discord fix lol
-                    count += 1;
-                }
-            } catch (error) {
-
-                if (errorPolicy.uncaughtException === "continue") {
-                    continue;
-                } else if (errorPolicy.uncaughtException === "warn") {
-                    log.error("Failed to load files.")
-                    log.error(`Problematic file: ${path.join(dir, file)}`, error)
-                    continue;
-                } else {
-                    log.error("Failed to load files.")
-                    log.error(`Problematic file: ${path.join(dir, file)}`, error)
-                    await forceShutdown("Failed to load files.")
-                }
-            }
+    const queryHelper = (plugin) => {
+        if ('execute' in plugin || 'command' in plugin) {
+            count++;
         }
     }
+
+    await loadDirHelper(dir, queryHelper, { root });
+
     return count;
 }
 
@@ -49,42 +93,24 @@ const queryFiles = async function (dir) {
  * Load files in a specific directory.
  * This runs the execute function.
  * @param {String} dir 
+ * @param {String} [root] - Defaults to the working directory.
  */
-const load = async function (dir) {
+const load = async function (dir, root) {
     let count = 0;
 
-    const files = fs.readdirSync(path.join(process.cwd(), dir), { recursive: true });
-    for (const file of files) {
+    const loadHelper = async (plugin, file) => {
+        if ('execute' in plugin && !('data' in plugin)) {
+            await plugin.execute();
+            count++;
 
-        // Only load JS files (trust)
-        if ([".js", ".cjs", ".mjs"].includes(path.extname(file).toLowerCase())) {
-
-            // Execute the plugin?
-            try {
-                const plugin = require(path.join(process.cwd(), dir, file));
-                if ('execute' in plugin && !('data' in plugin)) { // Discord fix lol
-                    await plugin.execute();
-                    count += 1;
-                    if (verbose) {
-                        log.info(`Loaded file: ${path.join(dir, file)}`)
-                    }
-                }
-            } catch (error) {
-
-                if (errorPolicy.uncaughtException === "continue") {
-                    continue;
-                } else if (errorPolicy.uncaughtException === "warn") {
-                    log.error("Failed to load files.")
-                    log.error(`Problematic file: ${path.join(dir, file)}`, error)
-                    continue;
-                } else {
-                    log.error("Failed to load files.")
-                    log.error(`Problematic file: ${path.join(dir, file)}`, error)
-                    await forceShutdown("Failed to load files.")
-                }
+            if (verbose) {
+                log.info(`Loaded file: ${path.join(dir, file)}`);
             }
         }
     }
+
+    await loadDirHelper(dir, loadHelper, { root });
+
     return count;
 }
 
@@ -93,170 +119,102 @@ const load = async function (dir) {
  * This runs the console function.
  * @param {String} dir 
  * @param {String} command 
+ * @param {String} [root] - Defaults to the working directory.
  */
-const loadConsole = async function (dir, command) {
+const loadConsole = async function (dir, command, root) {
 
-    let validCommand = false;
+    const loadConsoleHelper = async (plugin, file) => {
+        if ('command' in plugin) {
+            const validCommand = await plugin.command(command);
 
-    const files = fs.readdirSync(path.join(process.cwd(), dir), { recursive: true });
-    for (const file of files) {
-
-        // Only load JS files (trust)
-        if ([".js", ".cjs", ".mjs"].includes(path.extname(file).toLowerCase())) {
-
-            // Load the console command?
-            try {
-                const console = require(path.join(process.cwd(), dir, file));
-                if ('command' in console) {
-                    validCommand = await console.command(command);
-                    if (verbose) {
-                        log.info(`Loaded file: ${path.join(dir, file)}`)
-                    }
-                }
-                if (validCommand) {
-                    return true
-                }
-            } catch (error) {
-                if (errorPolicy.uncaughtException === "continue") {
-                    continue;
-                } else if (errorPolicy.uncaughtException === "warn") {
-                    log.error("Failed to load console files.")
-                    log.error(`Problematic file: ${path.join(dir, file)}`, error)
-                    continue;
-                } else {
-                    log.error("Failed to load console files.")
-                    log.error(`Problematic file: ${path.join(dir, file)}`, error)
-                    await forceShutdown("Failed to load console files.")
-                }
+            if (verbose) {
+                log.info(`Loaded file: ${path.join(dir, file)}`);
             }
+
+            return Boolean(validCommand);
         }
     }
-    return false;
+
+    const { stopped } = await loadDirHelper(dir, loadConsoleHelper, {
+        root,
+        errorMessage: "Failed to load console files."
+    });
+
+    return stopped;
 }
 
 /**
  * Load help menu.
  * This is meant to run dynamically.
  * @param {String} dir 
+ * @param {String} [root] - Defaults to the working directory.
  */
-const loadHelp = async function (dir) {
-
+const loadHelp = async function (dir, root) {
     let helpArray = [];
 
-    const files = fs.readdirSync(path.join(process.cwd(), dir), { recursive: true });
-    for (const file of files) {
-
-        // Only load JS files (trust)
-        if ([".js", ".cjs", ".mjs"].includes(path.extname(file).toLowerCase())) {
-
-            // Load the help menu?
-            try {
-                const help = require(path.join(process.cwd(), dir, file));
-                if ('help' in help) {
-                    helpArray = helpArray.concat(await help.help())
-                }
-            } catch (error) {
-                if (errorPolicy.uncaughtException === "continue") {
-                    continue;
-                } else if (errorPolicy.uncaughtException === "warn") {
-                    log.error("Failed to load help menu.")
-                    log.error(`Problematic file: ${path.join(dir, file)}`, error)
-                    continue;
-                } else {
-                    log.error("Failed to load help menu.")
-                    log.error(`Problematic file: ${path.join(dir, file)}`, error)
-                    await forceShutdown("Failed to load help menu")
-                }
-            }
+    const loadHelpHelper = async (plugin) => {
+        if ('help' in plugin) {
+            helpArray = helpArray.concat(await plugin.help());
         }
     }
+
+    await loadDirHelper(dir, loadHelpHelper, {
+        root,
+        errorMessage: "Failed to load help menu."
+    });
+
     return helpArray;
 }
 
 /**
  * Close everything (shut it all down) safely.
  * @param {String} dir 
+ * @param {String} [root] - Defaults to the working directory.
  */
-const close = async function (dir) {
+const close = async function (dir, root) {
 
-    let success = true;
+    const closeHelper = async (plugin, file) => {
+        if ('close' in plugin) {
+            await plugin.close();
 
-    const files = fs.readdirSync(path.join(process.cwd(), dir), { recursive: true });
-    for (const file of files) {
-
-        // Only load JS files (trust)
-        if ([".js", ".cjs", ".mjs"].includes(path.extname(file).toLowerCase())) {
-
-            try {
-                // Load the help menu?
-                const filename = require.resolve(path.join(process.cwd(), dir, file));
-                const cached = require.cache[filename];
-
-                if (!cached || !cached.loaded) {
-                    continue;
-                }
-
-                const app = cached.exports;
-                if ('close' in app) {
-                    await app.close()
-                    if (verbose) {
-                        log.info(`Closed file: ${path.join(dir, file)}`)
-                    }
-                }
-            } catch (error) {
-                success = false
-
-                if (errorPolicy.uncaughtException === "continue") {
-                    continue;
-                } else {
-                    log.error("Failed to close app.")
-                    log.error(`Problematic file: ${path.join(dir, file)}`, error)
-                }
+            if (verbose) {
+                log.info(`Closed file: ${path.join(dir, file)}`);
             }
         }
     }
+
+    const { success } = await loadDirHelper(dir, closeHelper, {
+        root,
+        cachedOnly: true,
+        fatal: false,
+        errorMessage: "Failed to close app."
+    });
+
     return success;
 }
 
 /**
  * Refresh everything
  * @param {String} dir 
+ * @param {String} [root] - Defaults to the working directory.
  */
-const refresh = async function (dir) {
+const refresh = async function (dir, root) {
 
-    let success = true;
+    const refreshHelper = async (plugin, file) => {
+        if ('reload' in plugin) {
+            await plugin.reload();
 
-    const files = fs.readdirSync(path.join(process.cwd(), dir), { recursive: true });
-    for (const file of files) {
-
-        // Only load JS files (trust)
-        if ([".js", ".cjs", ".mjs"].includes(path.extname(file).toLowerCase())) {
-
-            try {
-                // Load the help menu?
-                const app = require(path.join(process.cwd(), dir, file));
-                if ('reload' in app) {
-                    await app.reload()
-                    if (verbose) {
-                        log.info(`Refreshed file: ${path.join(dir, file)}`)
-                    }
-                }
-            } catch (error) {
-                success = false
-                if (errorPolicy.uncaughtException === "continue") {
-                    continue;
-                } else if (errorPolicy.uncaughtException === "warn") {
-                    log.error("Failed to refresh app.")
-                    log.error(`Problematic file: ${path.join(dir, file)}`, error)
-                    continue;
-                } else {
-                    log.error("Failed to refresh app.")
-                    log.error(`Problematic file: ${path.join(dir, file)}`, error)
-                    await forceShutdown("Failed to refresh app.")
-                }
+            if (verbose) {
+                log.info(`Refreshed file: ${path.join(dir, file)}`);
             }
         }
     }
+
+    const { success } = await loadDirHelper(dir, refreshHelper, {
+        root,
+        errorMessage: "Failed to refresh app."
+    });
+
     return success;
 }
 
