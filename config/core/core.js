@@ -23,5 +23,6 @@ module.exports = {
     errorPolicy: {
         uncaughtException: "shutdown",
         unhandledRejection: "warn",
+        healthPolicy: "warn"
     }
 }

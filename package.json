@@ -1,6 +1,6 @@
 {
   "name": "@nexint/lumina",
-  "version": "0.7.8",
+  "version": "0.7.9",
   "description": "Node.js framework lol",
   "main": "index.js",
   "scripts": {
@@ -18,7 +18,8 @@
     "./core/*": "./functions/core/*.js",
     "./core/*.mjs": "./functions/core/*.mjs",
     "./framework": "./config/core/framework.js",
-    "./preload/*": "./preload/*.js"
+    "./preload/*": "./preload/*.js",
+    "./power": "./functions/core/powerCycle.js"
   },
   "imports": {
     "#config/*": "./config/*.js",

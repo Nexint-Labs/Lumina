@@ -1,5 +1,5 @@
 const { getConfig } = require("#functions/core/getConfig");
-const { logDir } = getConfig("core/log");
+const { logDir, fileLogging } = getConfig("core/log");
 const fs = require("node:fs");
 const path = require("node:path");
 const { log, forceShutdown } = require("../../functions/core/fatalShutdown.mjs");
@@ -59,7 +59,7 @@ const loadLogFile = async function () {
     if (!process.send) {
         outputFileStream.write(`-----------------Info-------------------\n`);
         outputFileStream.write(`|  These logs are for debug purposes.  |\n`);
-        outputFileStream.write(`|    Logging is optional with args.    |\n`);
+        outputFileStream.write(`|    Logging is optional with conf.    |\n`);
         outputFileStream.write(`|    Logs are turned on by default.    |\n`);
         outputFileStream.write(`----------------------------------------\n`);
     }
@@ -76,7 +76,17 @@ const writeLogFile = async function (text) {
 module.exports = {
     writeLogFile,
     async execute() {
+        if (!fileLogging) return;
         await loadLogFile()
+    },
+
+    async health() {
+        if (!fileLogging) return true;
+        return outputFileStream instanceof fs.WriteStream
+            && outputFileStream.writable
+            && !outputFileStream.pending
+            && !outputFileStream.destroyed
+            && !outputFileStream.errored;
     },
 
     /**

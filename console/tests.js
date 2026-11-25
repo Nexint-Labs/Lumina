@@ -1,5 +1,6 @@
 const { clearDirectory } = require('#functions/core/clearCache');
 const { date } = require('#functions/core/date');
+const { gradient } = require('#functions/core/gradient');
 const { load, queryFiles } = require('#functions/core/load');
 const { log } = require('#functions/core/log.mjs');
 
@@ -9,7 +10,7 @@ module.exports = {
     // Expected Return: An array of strings.
     help() {
         return [
-            'Developer:',
+            'Testing:',
             '/test: Test the bot features!',
             'By default, /print prints what possible arguments there are.',
         ];
@@ -27,27 +28,27 @@ module.exports = {
                 switch (print) {
                     case "a":
                     case 'all':
-                        log.info(`\x1b[36m----------------------- Test -----------------------\x1b[0m`)
+                        log.info(gradient(`----------------------- Test -----------------------`, "#00ffff", "#FF00FF"))
                         clearDirectory("test")
                         const testFiles = await load("test")
                         log.success(`Tested ${testFiles} cases.`)
 
-                        log.info(`\x1b[36m--------------------- Nex ${date.getFullYear()} ---------------------\x1b[0m`)
+                        log.info(gradient(`--------------------- Nex ${date.getFullYear()} ---------------------`, "#00ffff", "#FF00FF"))
                         break;
                     case "i":
                     case 'info':
-                        log.info(`\x1b[36m-------------------- Build Info --------------------\x1b[0m`)
+                        log.info(gradient(`-------------------- Build Info --------------------`, "#00ffff", "#FF00FF"))
                         log.info(`Printing the test info!`)
                         const count = await queryFiles("test")
                         log.info(`Test files: ${count}`)
-                        log.info(`\x1b[36m--------------------- Nex ${date.getFullYear()} ---------------------\x1b[0m`)
+                        log.info(gradient(`--------------------- Nex ${date.getFullYear()} ---------------------`, "#00ffff", "#FF00FF"))
                         break;
                     default:
                         log.info(`Not a valid argument.`)
                         log.info(`Valid arguments:`)
                         log.info(`all - Test everything`)
                         log.info(`info - Information about the tester!`)
-                        log.info(`\x1b[36m--------------------- Nex ${date.getFullYear()} ---------------------\x1b[0m`)
+                        log.info(gradient(`--------------------- Nex ${date.getFullYear()} ---------------------`, "#00ffff", "#FF00FF"))
                 }
                 return true;
             default:
