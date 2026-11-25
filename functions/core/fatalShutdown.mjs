@@ -140,10 +140,10 @@ const forceShutdown = async function (cause) {
             }
         }
         if (!standalone) {
-        let dirs = ["plugins", "preload"];
+            let dirs = ["plugins", "preload"];
             for (const dir of dirs) {
-                if (!await close(dir, root)) {
-                    success = false
+                if (!await close(dir, frameworkDir)) {
+                    success = false;
                 }
             }
         }

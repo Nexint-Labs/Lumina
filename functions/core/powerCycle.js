@@ -142,8 +142,9 @@ const reload = async function (cause) {
         // Load Apps
         if (!standalone) {
             await load("plugins", root);
-            await load("apps", root);
         }
+
+        await load("apps", root);
         log.success(`Reload complete in ${(Date.now() - startReload) / 1000}s!`)
         log.warn("Note: Reloading is unstable and not explicitly supported. If things don't work, restart.")
         log.info(`\x1b[36m--------------------- Nex ${date.getFullYear()} ---------------------\x1b[0m`)
@@ -179,13 +180,7 @@ const refreshCycle = async function (cause) {
         // Clear non framework dirs
         for (const dir of clearedDirs) {
             cleared += clearDirectory(dir, root)
-        }
-
-        // Clear framework dirs
-        if (!standalone) {
-            for (const dir of clearedDirs) {
-                cleared += clearDirectory(dir, frameworkDir)
-            }
+            cleared += clearDirectory(dir, frameworkDir)
         }
 
         log.success(`Cleared ${cleared} files!`)
