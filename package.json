@@ -16,7 +16,8 @@
     ".": "./index.js",
     "./core/*": "./functions/core/*.js",
     "./core/*.mjs": "./functions/core/*.mjs",
-    "./framework": "./config/core/framework.js"
+    "./framework": "./config/core/framework.js",
+    "./preload/*": "./preload/*.js"
   },
   "imports": {
     "#config/*": "./config/*.js",
