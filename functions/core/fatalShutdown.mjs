@@ -1,13 +1,19 @@
-
-import chalk from "chalk";
+import { styleText } from "node:util";
 import dateCore from "./date.js";
-import dateOptionsCore from "#config/core/core";
+import config from "#functions/core/getConfig";
+import framework from "#config/core/framework";
 import fs from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
+import dirs from "#functions/core/dirs";
+
+const { root, frameworkDir, standalone } = dirs;
 
 const require = createRequire(import.meta.url);
-const { dateOptions, verbose } = dateOptionsCore
+
+const { getConfig } = config;
+const { dateOptions, verbose } = getConfig("core/core");
+const { frameName } = framework;
 const { date } = dateCore;
 const DateFormatter = new Intl.DateTimeFormat(undefined, dateOptions)
 const SHUTDOWN_TIMEOUT = 5000;
@@ -29,7 +35,15 @@ const log = {
      * @param {Error} error 
      */
     error: function (text, error) {
-        console.error(chalk.redBright(`[ERROR] [${DateFormatter.format(Date.now())}] ${text}`));
+
+        const messages = [
+            `[ERROR] [${DateFormatter.format(Date.now())}] ${text}`,
+        ]
+
+        for (const message of messages) {
+            console.error(styleText("redBright", message))
+        }
+
         if (error) {
             console.error(error)
         }
@@ -40,7 +54,14 @@ const log = {
      * @param {String} text 
      */
     event: function (text) {
-        console.log(chalk.blueBright(`[EVENT] [${DateFormatter.format(Date.now())}] ${text}`))
+
+        const messages = [
+            `[EVENT] [${DateFormatter.format(Date.now())}] ${text}`,
+        ]
+
+        for (const message of messages) {
+            console.log(styleText("blueBright", message))
+        }
     },
 }
 
@@ -49,12 +70,19 @@ const log = {
 /**
  * Close everything (shut it all down) safely.
  * @param {String} dir 
+ * @param {String} root 
  */
-const close = async function (dir) {
+const close = async function (dir, root = process.cwd()) {
 
     let success = true;
 
-    const files = fs.readdirSync(path.join(process.cwd(), dir), { recursive: true });
+    const dirPath = path.join(root, dir);
+
+    if (!fs.existsSync(dirPath)) {
+        return true;
+    }
+
+    const files = fs.readdirSync(dirPath, { recursive: true });
     for (const file of files) {
 
         // Only load JS files (trust)
@@ -62,7 +90,7 @@ const close = async function (dir) {
 
             // Load the help menu?
             try {
-                const filename = require.resolve(path.join(process.cwd(), dir, file));
+                const filename = require.resolve(path.join(root, dir, file));
                 const cached = require.cache[filename];
 
                 if (!cached || !cached.loaded) {
@@ -117,8 +145,16 @@ const forceShutdown = async function (cause) {
         let success = true;
         let dirs = ["apps", "plugins", "preload"];
         for (const dir of dirs) {
-            if (!await close(dir)) {
+            if (!await close(dir, root)) {
                 success = false
+            }
+        }
+        if (!standalone) {
+            let dirs = ["plugins", "preload"];
+            for (const dir of dirs) {
+                if (!await close(dir, frameworkDir)) {
+                    success = false;
+                }
             }
         }
         if (!success) {
@@ -127,7 +163,7 @@ const forceShutdown = async function (cause) {
             log.event("All components closed successfully.");
         }
     } catch (error) {
-        log.error("Prism could not be force shut down properly.", error)
+        log.error(`${frameName} could not be force shut down properly.`, error)
         process.exit(1);
     }
     log.event("Shutting down.")

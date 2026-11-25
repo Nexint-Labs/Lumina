@@ -1,29 +1,24 @@
 {
-  "name": "lumina",
-  "version": "0.7.5",
+  "name": "@nexint/lumina",
+  "version": "0.7.8",
   "description": "Node.js framework lol",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "node --test"
+    "test": "node --test",
+    "publish:dev": "npm version patch --no-git-tag-version && git add -A && git commit -m \"Development release\" && git push origin dev && npm publish --tag dev"
   },
   "keywords": [],
   "author": "Nexint",
   "license": "UNLICENSED",
-  "private": true,
+  "private": false,
   "type": "commonjs",
-  "dependencies": {
-    "chalk": "^6.0.1",
-    "discord-hybrid-sharding": "^3.0.1",
-    "discord.js": "^14.28.1",
-    "dotenv": "^18.0.10",
-    "express": "^5.3.0",
-    "http": "^0.0.1-security",
-    "linkify-it": "^6.1.0",
-    "profanease": "^2.0.3",
-    "sequelize": "^6.37.8",
-    "sqlite3": "^6.0.1",
-    "ws": "^8.23.0"
+  "exports": {
+    ".": "./index.js",
+    "./core/*": "./functions/core/*.js",
+    "./core/*.mjs": "./functions/core/*.mjs",
+    "./framework": "./config/core/framework.js",
+    "./preload/*": "./preload/*.js"
   },
   "imports": {
     "#config/*": "./config/*.js",
@@ -31,9 +26,14 @@
     "#functions/*.mjs": "./functions/*.mjs",
     "#preload/*": "./preload/*.js",
     "#console/*": "./console/*.js",
-    "#bot": "./bot.js",
-    "#index": "./boot.js",
-    "#apps/*": "./apps/*.js",
-    "#appHelpers/*": "./appHelpers/*.js"
+    "#index": "./boot.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Nexint-Labs/Lumina.git"
+  },
+  "homepage": "https://github.com/Nexint-Labs/Lumina",
+  "bugs": {
+    "url": "https://github.com/Nexint-Labs/Lumina/issues"
   }
 }

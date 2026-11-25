@@ -1,9 +1,61 @@
-import core from "#config/core/core";
-import chalk from "chalk"
+import config from "#functions/core/getConfig";
+const { getConfig } = config;
+const { dateOptions } = getConfig("core/core");
+import { styleText, inspect } from "node:util";
 import { forceShutdown } from "./fatalShutdown.mjs";
-import util from "node:util"
 import { writeLogFile } from "#preload/core/fileLog";
-const { dateOptions } = core;
+import { clearLine, cursorTo } from "node:readline";
+
+/**
+ * @type {import("node:readline").Interface | null}
+ */
+let rl = null;
+
+/**
+ * Register the readline interface.
+ * @param {import("node:readline").Interface | null} instance
+ */
+const setReadline = function (instance) {
+    rl = instance;
+
+    if (instance) {
+        instance.once("close", () => {
+            if (rl === instance) {
+                if (process.stdout.isTTY) {
+                    clearLine(process.stdout, 0);
+                    cursorTo(process.stdout, 0);
+                }
+
+                rl = null;
+            }
+        });
+    }
+};
+
+/**
+ * Print Helper lol
+ * @param {Function} output 
+ * @param  {...any} args 
+ */
+const printHelper = function (output, ...args) {
+    const interactive = rl && process.stdout.isTTY;
+
+    if (interactive) {
+        clearLine(process.stdout, 0);
+        cursorTo(process.stdout, 0);
+    }
+
+    output(...args);
+
+    if (interactive) {
+        rl.prompt(true);
+    }
+};
+
+// Helper functions
+const print = (...args) => printHelper(console.log, ...args);
+const printErr = (...args) => printHelper(console.error, ...args);
+
 const DateFormatter = new Intl.DateTimeFormat(undefined, dateOptions)
 let infoCount = 0;
 let successCount = 0;
@@ -19,7 +71,7 @@ const log = {
      * @param {String} text 
      */
     info: function (text) {
-        console.log(`[INFO] [${DateFormatter.format(Date.now())}] ${text}`);
+        print(`[INFO] [${DateFormatter.format(Date.now())}] ${text}`);
         infoCount += 1;
     },
 
@@ -34,7 +86,7 @@ const log = {
         ]
 
         for (const message of messages) {
-            console.log(chalk.greenBright(message))
+            print(styleText("greenBright", message))
             writeLogFile(message)
         }
         successCount += 1;
@@ -51,7 +103,7 @@ const log = {
         ]
 
         for (const message of messages) {
-            console.log(chalk.blueBright(message))
+            print(styleText("blueBright", message))
             writeLogFile(message)
         }
         eventCount += 1;
@@ -68,7 +120,7 @@ const log = {
         ]
 
         for (const message of messages) {
-            console.log(chalk.yellowBright(message))
+            print(styleText("yellowBright", message))
             writeLogFile(message)
         }
         warnCount += 1;
@@ -86,14 +138,14 @@ const log = {
         ]
 
         for (const message of messages) {
-            console.error(chalk.redBright(message))
+            printErr(styleText("redBright", message))
             writeLogFile(message)
         }
 
         if (error) {
-            console.error(error)
+            printErr(error)
 
-            const formatted = util.inspect(error, {
+            const formatted = inspect(error, {
                 depth: null,
                 colors: false,
                 showHidden: true
@@ -127,14 +179,14 @@ const log = {
         ]
 
         for (const message of messages) {
-            console.error(chalk.red(message))
+            printErr(styleText("red", message))
             writeLogFile(message)
         }
 
         if (error) {
-            console.error(error)
+            printErr(error)
 
-            const formatted = util.inspect(error, {
+            const formatted = inspect(error, {
                 depth: null,
                 colors: false,
                 showHidden: true
@@ -171,4 +223,4 @@ const getFatal = function () {
     return fatalCount
 }
 
-export { log, getInfo, getSuccess, getWarn, getError, getEvent, getFatal };
+export { log, getInfo, getSuccess, getWarn, getError, getEvent, getFatal, setReadline, print };

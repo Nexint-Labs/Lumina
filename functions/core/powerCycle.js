@@ -2,6 +2,7 @@ const { clearDirectory } = require("./clearCache");
 const { date } = require("./date");
 const { close, refresh, load } = require("./load");
 const { log } = require("./log.mjs");
+const { root, frameworkDir, standalone } = require("#functions/core/dirs")
 
 let shutDownState = null;
 let otherState = null;
@@ -13,6 +14,7 @@ let otherState = null;
  * @param {Boolean} exit 
  */
 const gracefulShutdown = async function (cause, exit) {
+    
     if (shutDownState) {
         await log.fatal(`Additional shutdown requested during active shutdown. Escalating to forced shutdown. Cause: ${cause}`, null, 0x0004, true);
         process.exit(1) // again, this shouldnt happen in any circumstance, but just a failsafe :)
@@ -30,11 +32,24 @@ const gracefulShutdown = async function (cause, exit) {
         log.event("Closing all apps...")
         let success = true;
         let dirs = ["apps", "plugins", "preload"];
+
+        // Close Apps
         for (const dir of dirs) {
-            if (!await close(dir)) {
+            if (!await close(dir, root)) {
                 success = false
             }
         }
+
+        // Close Framework
+        if (!standalone) {
+            dirs = ["plugins", "preload"];
+            for (const dir of dirs) {
+                if (!await close(dir, frameworkDir)) {
+                    success = false
+                }
+            }
+        }
+
         if (!success) {
             log.error("One or more components failed to close.");
         } else {
@@ -77,9 +92,21 @@ const reload = async function (cause) {
         // Closes apps and plugins
         let success = true;
         let dirs = ["apps", "plugins"];
+
+        // Reload App Dirs
         for (const dir of dirs) {
-            if (!await close(dir)) {
+            if (!await close(dir, root)) {
                 success = false
+            }
+        }
+
+        // Reload Framework
+        if (!standalone) {
+            dirs = ["plugins"];
+            for (const dir of dirs) {
+                if (!await close(dir, frameworkDir)) {
+                    success = false
+                }
             }
         }
 
@@ -92,15 +119,33 @@ const reload = async function (cause) {
         }
 
         let cleared = 0;
-        const clearedDirs = ["apps", "plugins", "functions", "test", "config", "console"]
+        let clearedDirs = ["apps", "plugins", "functions", "test", "config", "console"]
+
+        // Clear non framework dirs
+        // Sidenote: This shouldn't technically need an order lol
         for (const dir of clearedDirs) {
-            cleared += clearDirectory(dir)
+            cleared += clearDirectory(dir, root)
         }
+
+        // Clear framework dirs
+        if (!standalone) {
+            clearedDirs = ["plugins", "functions", "test", "config", "console"]
+            for (const dir of clearedDirs) {
+                cleared += clearDirectory(dir, frameworkDir)
+            }
+        }
+
         log.success(`Cleared ${cleared} files!`)
 
-        // Load apps and plugins
-        await load("plugins");
-        await load("apps");
+        // Load Framework
+        await load("plugins", frameworkDir);
+
+        // Load Apps
+        if (!standalone) {
+            await load("plugins", root);
+        }
+
+        await load("apps", root);
         log.success(`Reload complete in ${(Date.now() - startReload) / 1000}s!`)
         log.warn("Note: Reloading is unstable and not explicitly supported. If things don't work, restart.")
         log.info(`\x1b[36m--------------------- Nex ${date.getFullYear()} ---------------------\x1b[0m`)
@@ -132,17 +177,15 @@ const refreshCycle = async function (cause) {
 
         let cleared = 0;
         const clearedDirs = ["functions", "config", "console"]
+
+        // Clear non framework dirs
         for (const dir of clearedDirs) {
-            cleared += clearDirectory(dir)
+            cleared += clearDirectory(dir, root)
+            cleared += clearDirectory(dir, frameworkDir)
         }
+
         log.success(`Cleared ${cleared} files!`)
-        let success = true;
-        let dirs = ["apps"];
-        for (const dir of dirs) {
-            if (!await refresh(dir)) {
-                success = false
-            }
-        }
+        const success = await refresh("apps", root);
 
         // Determine success or not
         if (!success) {
@@ -166,5 +209,6 @@ const refreshCycle = async function (cause) {
 module.exports = {
     gracefulShutdown,
     reload,
-    refreshCycle
+    refreshCycle,
+    persist: true
 }

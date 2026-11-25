@@ -1,6 +1,6 @@
 const { log } = require("./log.mjs");
 
-const { frameVer, autoUpdate, frameID, updateURL, frameName, errorPolicy, updateSource } = require('#config/core/core');
+const { frameName, frameVer, frameID, updateSource, updateURL } = require('#config/core/framework');
 
 /**
  * Gets the latest version of this bot!
@@ -8,18 +8,29 @@ const { frameVer, autoUpdate, frameID, updateURL, frameName, errorPolicy, update
  */
 const getUpdateVersion = async function () {
     try {
-        const update = await fetch(updateSource + "/ver.txt");
+        // Update Versions
+        const update = await fetch(updateSource + "/ver.txt", {
+            signal: AbortSignal.timeout(5000)
+        });
         if (!update.ok) {
             throw new Error(`HTTP ${update.status}: ${update.statusText}`);
         }
-        const updateName = await fetch(updateSource + "/verName.txt");
-        if (!update.ok) {
-            throw new Error(`HTTP ${update.status}: ${update.statusText}`);
+
+        // Update Version
+        const updateName = await fetch(updateSource + "/verName.txt", {
+            signal: AbortSignal.timeout(5000)
+        });
+        if (!updateName.ok) {
+            throw new Error(`HTTP ${updateName.status}: ${updateName.statusText}`);
         }
+
+        // Get the actual versions lol
         const tmp = await update.text();
         const version = Number(tmp)
         const result = await updateName.text();
         const versionName = result
+
+        // isNan?
         if (!Number.isNaN(version)) {
             return [versionName, version]
         } else {
@@ -42,22 +53,22 @@ const getUpdateVersion = async function () {
 const updateCheck = async function (initial) {
     const check = await getUpdateVersion();
     if (!check) {
-        log.error("Something went wrong updating Prism!")
+        log.error(`Something went wrong updating ${frameName}!`)
         return;
     }
     const [versionName, latestVersion] = check
 
     if (frameID < latestVersion) {
-        log.warn(`You're running an outdated version of ${frameName}! (You are ${latestVersion - frameID} commits behind)`)
+        log.warn(`You're running an outdated version of ${frameName}! (You are ${latestVersion - frameID} revisions behind)`)
         log.warn(`Update now at ${updateURL} to make sure that ${frameName} has the latest security fixes!`)
         if ((latestVersion - frameID) >= 5) {
-            log.warn(`You are over 5 commits behind. Update to the latest version as soon as possible.`)
+            log.warn(`You are over 5 revisions behind. Update to the latest version as soon as possible.`)
         }
         log.warn(`Current version: v${frameVer} / Latest Version: ${versionName}`)
     } else if (latestVersion <= 0) {
-        log.warn("This instance of Prism cannot reliably connect to the internet.")
+        log.warn(`This instance of ${frameName} is fetching an invalid version.`)
     } else if (frameID > latestVersion) {
-        log.warn(`You're running an experimental version of ${frameName}! (You are ${frameID - latestVersion} commits ahead)`)
+        log.warn(`You're running an experimental version of ${frameName}! (You are ${frameID - latestVersion} revisions ahead)`)
         log.warn(`Here be dragons!~`)
         log.warn(`Current version: v${frameVer} / Latest Version: ${versionName}`)
     } else if (initial) {

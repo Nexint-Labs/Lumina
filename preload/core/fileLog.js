@@ -1,8 +1,9 @@
-const { logDir } = require("#config/core/log");
+const { getConfig } = require("#functions/core/getConfig");
+const { logDir } = getConfig("core/log");
 const fs = require("node:fs");
 const path = require("node:path");
 const { log, forceShutdown } = require("../../functions/core/fatalShutdown.mjs");
-const { frameName } = require("#config/core/core");
+const { frameName } = require("#config/core/framework");
 
 let logFormat = process.env.PRISM_LOG_FORMAT;
 
@@ -28,8 +29,10 @@ const loadLogFile = async function () {
     const dirs = [logDir];
     dirs.forEach((dir) => {
         if (!fs.existsSync(dir)) {
-            log.info(`Creating directory: ${dir}`);
-            fs.mkdirSync(path.join(process.cwd(), dir));
+            log.event(`Creating directory: ${dir}`);
+            fs.mkdirSync(path.join(process.cwd(), dir), {
+                recursive: true
+            });
         };
     });
     outputFileStream = fs.createWriteStream(path.join(process.cwd(), logDir, `${logFormat}.txt`), { 'flags': 'a' });

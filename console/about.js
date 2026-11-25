@@ -1,5 +1,6 @@
-const { frameName, frameVer, frameID } = require('#config/core/core');
-const { pluginName, pluginVer } = require('#config/cosmetic/config');
+const { frameName, frameVer, frameID } = require('#config/core/framework');
+const { getConfig } = require("#functions/core/getConfig");
+const { pluginName, pluginVer } = getConfig("cosmetic/config");
 const { date } = require('#functions/core/date');
 const { log, getInfo, getSuccess, getWarn, getError, getFatal, getEvent } = require('#functions/core/log.mjs');
 const { getUpdateVersion } = require('#functions/core/update');
@@ -29,13 +30,13 @@ module.exports = {
                     case "v":
                     case 'version':
                         log.info(`\x1b[36m------------------- Version Info -------------------\x1b[0m`)
-                        let latestVersion = await getUpdateVersion();
+                        const [, latestVersion] = await getUpdateVersion() || [];
                         log.info("Printing the version...")
                         log.info(`${pluginName} Version: ${pluginVer}`)
                         log.info(`${frameName} Version: ${frameVer} (Version ID: ${frameID}) / Latest version ID: ${latestVersion}.`)
                         if (latestVersion > frameID) {
                             log.info(`${latestVersion - frameID} commits behind.`)
-                        } else if (latestVersion == 0) {
+                        } else if (!latestVersion) {
                             log.warn(`Updates may or may not be working.`)
                         } else if (latestVersion < frameID) {
                             log.info(`${frameID - latestVersion} commits ahead.`)

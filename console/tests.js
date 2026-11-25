@@ -1,10 +1,7 @@
-const { frameName, frameVer, frameID } = require('#config/core/core');
-const { pluginName, pluginVer } = require('#config/cosmetic/config');
 const { clearDirectory } = require('#functions/core/clearCache');
 const { date } = require('#functions/core/date');
 const { load, queryFiles } = require('#functions/core/load');
-const { log, getInfo, getSuccess, getWarn, getError, getFatal, getEvent } = require('#functions/core/log.mjs');
-const { getUpdateVersion } = require('#functions/core/update');
+const { log } = require('#functions/core/log.mjs');
 
 module.exports = {
     // Example of a help menu given by the bot.

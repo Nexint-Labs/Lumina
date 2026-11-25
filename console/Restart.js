@@ -4,10 +4,13 @@ const { restart } = require('../../config.js');
 const { helpMenu, readline, spawn, exitHandler, server } = require('../../index.js');
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 */
-const { restart, frameName } = require("#config/core/core");
-const { pluginName } = require("#config/cosmetic/config");
+const { frameName } = require('#config/core/framework');
+const { getConfig } = require("#functions/core/getConfig");
+const { restart } = getConfig("core/core");
+const { pluginName } = getConfig("cosmetic/config");
 const { date } = require("#functions/core/date");
 const delay = require("#functions/core/delay");
+const { frameworkDir, standalone, root } = require("#functions/core/dirs");
 const { loadHelp } = require("#functions/core/load");
 const { log } = require('#functions/core/log.mjs');
 const { gracefulShutdown, refreshCycle, reload } = require('#functions/core/powerCycle');
@@ -25,7 +28,7 @@ module.exports = {
             'The help menu can be expanded upon by other plugins.',
             '/info (page) - Opens a neat info menu!',
             'This function can\'t be expanded upon by other plugins.',
-            '/reload - Mirror of /refresh',
+            '/reload - Reloads the entire app (nearly from scratch)',
             '/refresh - Refreshes commands, etc.',
             '/restart - Restarts the bot. Recommended when updating.',
             '/rs - Mirror of /restart',
@@ -41,7 +44,11 @@ module.exports = {
             case "/h":
             case "/help":
 
-                const helpMenu = await loadHelp("console")
+                let helpMenu = await loadHelp("console", frameworkDir);
+
+                if (!standalone) {
+                    helpMenu = helpMenu.concat(await loadHelp("console", root));
+                }
 
                 // Help Menu
                 let page;
