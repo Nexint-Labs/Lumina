@@ -4,6 +4,9 @@ import dateOptionsCore from "#config/core/core";
 import fs from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
+import dirs from "#functions/core/dirs";
+
+const { root, frameworkDir, standalone } = dirs;
 
 const require = createRequire(import.meta.url);
 const { dateOptions, verbose, frameName } = dateOptionsCore;
@@ -63,12 +66,13 @@ const log = {
 /**
  * Close everything (shut it all down) safely.
  * @param {String} dir 
+ * @param {String} root 
  */
-const close = async function (dir) {
+const close = async function (dir, root = process.cwd()) {
 
     let success = true;
 
-    const files = fs.readdirSync(path.join(process.cwd(), dir), { recursive: true });
+    const files = fs.readdirSync(path.join(root, dir), { recursive: true });
     for (const file of files) {
 
         // Only load JS files (trust)
@@ -76,7 +80,7 @@ const close = async function (dir) {
 
             // Load the help menu?
             try {
-                const filename = require.resolve(path.join(process.cwd(), dir, file));
+                const filename = require.resolve(path.join(root, dir, file));
                 const cached = require.cache[filename];
 
                 if (!cached || !cached.loaded) {
@@ -131,8 +135,16 @@ const forceShutdown = async function (cause) {
         let success = true;
         let dirs = ["apps", "plugins", "preload"];
         for (const dir of dirs) {
-            if (!await close(dir)) {
+            if (!await close(dir, root)) {
                 success = false
+            }
+        }
+        if (!standalone) {
+        let dirs = ["plugins", "preload"];
+            for (const dir of dirs) {
+                if (!await close(dir, root)) {
+                    success = false
+                }
             }
         }
         if (!success) {

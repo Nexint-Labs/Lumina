@@ -41,6 +41,7 @@ const gracefulShutdown = async function (cause, exit) {
 
         // Close Framework
         if (!standalone) {
+            dirs = ["plugins", "preload"];
             for (const dir of dirs) {
                 if (!await close(dir, frameworkDir)) {
                     success = false
@@ -100,6 +101,7 @@ const reload = async function (cause) {
 
         // Reload Framework
         if (!standalone) {
+            dirs = ["plugins"];
             for (const dir of dirs) {
                 if (!await close(dir, frameworkDir)) {
                     success = false
@@ -116,7 +118,7 @@ const reload = async function (cause) {
         }
 
         let cleared = 0;
-        const clearedDirs = ["apps", "plugins", "functions", "test", "config", "console"]
+        let clearedDirs = ["apps", "plugins", "functions", "test", "config", "console"]
 
         // Clear non framework dirs
         // Sidenote: This shouldn't technically need an order lol
@@ -126,6 +128,7 @@ const reload = async function (cause) {
 
         // Clear framework dirs
         if (!standalone) {
+            clearedDirs = ["plugins", "functions", "test", "config", "console"]
             for (const dir of clearedDirs) {
                 cleared += clearDirectory(dir, frameworkDir)
             }
@@ -135,7 +138,6 @@ const reload = async function (cause) {
 
         // Load Framework
         await load("plugins", frameworkDir);
-        await load("apps", frameworkDir);
 
         // Load Apps
         if (!standalone) {
@@ -185,7 +187,7 @@ const refreshCycle = async function (cause) {
                 cleared += clearDirectory(dir, frameworkDir)
             }
         }
-        
+
         log.success(`Cleared ${cleared} files!`)
         let success = true;
         let dirs = ["apps"];

@@ -8,6 +8,7 @@ const { restart, frameName } = require("#config/core/core");
 const { pluginName } = require("#config/cosmetic/config");
 const { date } = require("#functions/core/date");
 const delay = require("#functions/core/delay");
+const { frameworkDir, standalone, root } = require("#functions/core/dirs");
 const { loadHelp } = require("#functions/core/load");
 const { log } = require('#functions/core/log.mjs');
 const { gracefulShutdown, refreshCycle, reload } = require('#functions/core/powerCycle');
@@ -41,7 +42,11 @@ module.exports = {
             case "/h":
             case "/help":
 
-                const helpMenu = await loadHelp("console")
+                let helpMenu = await loadHelp("console", frameworkDir);
+
+                if (!standalone) {
+                    helpMenu = helpMenu.concat(await loadHelp("console", root));
+                }
 
                 // Help Menu
                 let page;
