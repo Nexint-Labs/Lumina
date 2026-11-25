@@ -12,15 +12,18 @@
   "license": "UNLICENSED",
   "private": true,
   "type": "commonjs",
+  "exports": {
+    ".": "./index.js",
+    "./core/*": "./functions/core/*.js",
+    "./core/*.mjs": "./functions/core/*.mjs",
+    "./framework": "./config/core/framework.js"
+  },
   "imports": {
     "#config/*": "./config/*.js",
     "#functions/*": "./functions/*.js",
     "#functions/*.mjs": "./functions/*.mjs",
     "#preload/*": "./preload/*.js",
     "#console/*": "./console/*.js",
-    "#bot": "./bot.js",
-    "#index": "./boot.js",
-    "#apps/*": "./apps/*.js",
-    "#appHelpers/*": "./appHelpers/*.js"
+    "#index": "./boot.js"
   }
 }

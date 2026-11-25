@@ -76,7 +76,13 @@ const close = async function (dir, root = process.cwd()) {
 
     let success = true;
 
-    const files = fs.readdirSync(path.join(root, dir), { recursive: true });
+    const dirPath = path.join(root, dir);
+
+    if (!fs.existsSync(dirPath)) {
+        return true;
+    }
+
+    const files = fs.readdirSync(dirPath, { recursive: true });
     for (const file of files) {
 
         // Only load JS files (trust)

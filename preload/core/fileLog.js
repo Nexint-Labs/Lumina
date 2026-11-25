@@ -29,8 +29,10 @@ const loadLogFile = async function () {
     const dirs = [logDir];
     dirs.forEach((dir) => {
         if (!fs.existsSync(dir)) {
-            log.info(`Creating directory: ${dir}`);
-            fs.mkdirSync(path.join(process.cwd(), dir));
+            log.event(`Creating directory: ${dir}`);
+            fs.mkdirSync(path.join(process.cwd(), dir), {
+                recursive: true
+            });
         };
     });
     outputFileStream = fs.createWriteStream(path.join(process.cwd(), logDir, `${logFormat}.txt`), { 'flags': 'a' });

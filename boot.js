@@ -105,7 +105,7 @@ const init = async function () {
     };
 
     // Make sure directories exist lol
-    const dirs = ["plugins", "preload", "console", "databases", "apps", "functions", "logs", "test"];
+    const dirs = ["plugins", "preload", "console", "databases", "apps", "functions", "test"];
     dirs.forEach((dir) => {
         const dirPath = path.join(root, dir);
 

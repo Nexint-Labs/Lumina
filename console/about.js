@@ -30,13 +30,13 @@ module.exports = {
                     case "v":
                     case 'version':
                         log.info(`\x1b[36m------------------- Version Info -------------------\x1b[0m`)
-                        let latestVersion = await getUpdateVersion();
+                        const [, latestVersion] = await getUpdateVersion() || [];
                         log.info("Printing the version...")
                         log.info(`${pluginName} Version: ${pluginVer}`)
                         log.info(`${frameName} Version: ${frameVer} (Version ID: ${frameID}) / Latest version ID: ${latestVersion}.`)
                         if (latestVersion > frameID) {
                             log.info(`${latestVersion - frameID} commits behind.`)
-                        } else if (latestVersion == 0) {
+                        } else if (!latestVersion) {
                             log.warn(`Updates may or may not be working.`)
                         } else if (latestVersion < frameID) {
                             log.info(`${frameID - latestVersion} commits ahead.`)

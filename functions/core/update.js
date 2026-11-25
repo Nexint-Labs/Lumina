@@ -17,7 +17,7 @@ const getUpdateVersion = async function () {
         // Update Version
         const updateName = await fetch(updateSource + "/verName.txt");
         if (!updateName.ok) {
-            throw new Error(`HTTP ${update.status}: ${update.statusText}`);
+            throw new Error(`HTTP ${updateName.status}: ${updateName.statusText}`);
         }
 
         // Get the actual versions lol
