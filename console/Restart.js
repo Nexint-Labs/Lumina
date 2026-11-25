@@ -28,7 +28,7 @@ module.exports = {
             'The help menu can be expanded upon by other plugins.',
             '/info (page) - Opens a neat info menu!',
             'This function can\'t be expanded upon by other plugins.',
-            '/reload - Mirror of /refresh',
+            '/reload - Reloads the entire app (nearly from scratch)',
             '/refresh - Refreshes commands, etc.',
             '/restart - Restarts the bot. Recommended when updating.',
             '/rs - Mirror of /restart',

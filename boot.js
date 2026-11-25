@@ -25,7 +25,7 @@ const { logFormat } = getConfig("core/log");
 if (!process.env.PRISM_LOG_FORMAT) {
     process.env.PRISM_LOG_FORMAT = logFormat
 }
-const { log } = require('#functions/core/log.mjs');
+const { log, setReadline, print } = require('#functions/core/log.mjs');
 
 log.event(`Loading configs...`)
 const { autoUpdate, errorPolicy } = getConfig("core/core");
@@ -45,6 +45,7 @@ const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
 });
+setReadline(rl);
 const prompt = (query) => new Promise((resolve) => rl.question(query, resolve));
 
 // Start loading
@@ -172,7 +173,7 @@ const main = async () => {
     } else {
         log.success(`Done in ${(elapsed / 1000).toFixed(3)} seconds!`);
     }
-    console.log("Server is running.")
+    print("Server is running.")
 
     await updateCheck(true)
 

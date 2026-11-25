@@ -57,18 +57,22 @@ Only install and execute modules from trusted sources. Developers are responsibl
 
 ## Getting Started
 
-Install the required dependencies:
+Install the package on NPM
 
 ```sh
-npm install
+npm install @nexint/lumina
 ```
 
-Create and configure your `.env` file, and review the framework configuration under `config/core/`.
+Create your start file: (for this example, it's index.js)
+
+```js
+require("@nexint/lumina");
+```
 
 To start Lumina:
 
 ```sh
-npm start
+node index.js
 ```
 
 ## Integrating with Lumina

@@ -3,9 +3,33 @@ const path = require("node:path");
 const { root, frameworkDir, standalone } = require("./dirs");
 
 /**
- * get config for the framework lol
- * @param {String} name
- * @returns {Object}
+ * @overload
+ * @param {"core/core"} name
+ * @returns {typeof import("../../config/core/core")}
+ */
+
+/**
+ * @overload
+ * @param {"core/log"} name
+ * @returns {typeof import("../../config/core/log")}
+ */
+
+/**
+ * @overload
+ * @param {"cosmetic/config"} name
+ * @returns {typeof import("../../config/cosmetic/config")}
+ */
+
+/**
+ * @overload
+ * @param {string} name
+ * @returns {Record<string, any>}
+ */
+
+/**
+ * Get configuration with application overrides.
+ * @param {string} name
+ * @returns {any}
  */
 const getConfig = function (name) {
 

@@ -10,7 +10,9 @@ module.exports = {
     verbose: false, // Extra Logging Info
     autoUpdate: true,
 
-    restart: "start start.bat", // Restart command. This would be different on a linux based system. It would be "sh start.sh".
+    restart: process.platform === "win32"
+        ? "start start.bat"
+        : "sh start.sh", // Restart command. This would be different on a linux based system. It would be "sh start.sh".
     // args: ['--', 'bash', '-c', "./start.sh"],
 
     /*

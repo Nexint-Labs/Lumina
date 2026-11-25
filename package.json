@@ -1,6 +1,6 @@
 {
   "name": "@nexint/lumina",
-  "version": "0.7.6",
+  "version": "0.7.7",
   "description": "Node.js framework lol",
   "main": "index.js",
   "scripts": {
@@ -26,5 +26,13 @@
     "#preload/*": "./preload/*.js",
     "#console/*": "./console/*.js",
     "#index": "./boot.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Nexint-Labs/Lumina.git"
+  },
+  "homepage": "https://github.com/Nexint-Labs/Lumina",
+  "bugs": {
+    "url": "https://github.com/Nexint-Labs/Lumina/issues"
   }
 }
