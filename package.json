@@ -1,6 +1,6 @@
 {
   "name": "@nexint/lumina",
-  "version": "0.7.10",
+  "version": "0.8.0",
   "description": "Node.js framework lol",
   "main": "index.js",
   "scripts": {
