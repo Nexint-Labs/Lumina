@@ -4,7 +4,8 @@ const { pluginName, pluginVer } = getConfig("cosmetic/config");
 const { date } = require('#functions/core/date');
 const { log, getInfo, getSuccess, getWarn, getError, getFatal, getEvent } = require('#functions/core/log.mjs');
 const { getUpdateVersion } = require('#functions/core/update');
-const { gradient } = require('#functions/core/gradient');
+const { primary, accent, lumeAccent } = require('#functions/core/gradient');
+const { pluralValues } = require('#functions/core/pluralValues');
 
 module.exports = {
     // Example of a help menu given by the bot.
@@ -13,8 +14,9 @@ module.exports = {
     help() {
         return [
             'Developer:',
-            '/print (args) - Prints stuff to the console!',
-            'By default, /print prints what possible arguments there are.',
+            `/print version - Prints version info`,
+            `/print build - Prints ${frameName} build`,
+            `/print logs - Prints the log events.`,
         ];
     },
     // Example of a command in the CLI (command line) of the bot.
@@ -29,34 +31,48 @@ module.exports = {
                 }
                 switch (print) {
                     case "v":
+                    case "ver":
                     case 'version':
-                        log.info(gradient(`------------------- Version Info -------------------`, "#00ffff", "#FF00FF"))
+                        log.info(primary(`------------------- Version Info -------------------`))
                         const [, latestVersion] = await getUpdateVersion() || [];
                         log.info("Printing the version...")
-                        log.info(`${pluginName} Version: ${pluginVer}`)
-                        log.info(`${frameName} Version: ${frameVer} (Version ID: ${frameID}) / Latest version ID: ${latestVersion}.`)
+                        if (pluginName === "N/A") {
+                            log.info(`No apps installed.`)
+                        } else {
+                            log.info(`${primary(pluginName)} Version: ${primary(pluginVer)}`)
+                        }
+                        if (latestVersion !== undefined) {
+                            log.info(`${lumeAccent(frameName)} Version: ${lumeAccent(frameVer)} (Version ID: ${frameID}) / Latest version ID: ${latestVersion}.`)
+                        } else {
+                            log.info(`${lumeAccent(frameName)} Version: ${lumeAccent(frameVer)}.`)
+                        }
                         if (latestVersion > frameID) {
-                            log.info(`${latestVersion - frameID} commits behind.`)
+                            log.info(`${latestVersion - frameID} revision${pluralValues(latestVersion - frameID)} behind.`)
                         } else if (!latestVersion) {
-                            log.warn(`Updates may or may not be working.`)
+                            log.warn(`Framework may or may not be working.`)
                         } else if (latestVersion < frameID) {
-                            log.info(`${frameID - latestVersion} commits ahead.`)
+                            log.info(`${frameID - latestVersion} revision${pluralValues(frameID - latestVersion)} ahead.`)
                         } else {
                             log.info(`Running the latest version.`)
                         }
-                        log.info(gradient(`--------------------- Nex ${date.getFullYear()} ---------------------`, "#00ffff", "#FF00FF"))
+                        log.info(accent(`--------------------- Nex ${date.getFullYear()} ---------------------`))
                         break;
                     case "b":
                     case 'build':
-                        log.info(gradient(`-------------------- Build Info --------------------`, "#00ffff", "#FF00FF"))
+                        log.info(primary(`-------------------- Build Info --------------------`))
                         log.info(`Printing the build!`)
-                        log.info(`${pluginName} v${pluginVer}`)
-                        log.info(`${frameName} v${frameVer}`)
-                        log.info(gradient(`--------------------- Nex ${date.getFullYear()} ---------------------`, "#00ffff", "#FF00FF"))
+                        if (pluginName === "N/A") {
+                            log.info(`No apps installed.`)
+                        } else {
+                            log.info(`${primary(pluginName)} v${primary(pluginVer)}`)
+                        }
+                        log.info(`${lumeAccent(frameName)} v${lumeAccent(frameVer)}`)
+                        log.info(accent(`--------------------- Nex ${date.getFullYear()} ---------------------`))
                         break;
                     case 'l':
+                    case 'log':
                     case 'logs':
-                        log.info(gradient(`--------------------- Log Info ---------------------`, "#00ffff", "#FF00FF"))
+                        log.info(primary(`--------------------- Log Info ---------------------`))
                         log.info(`${getInfo() + getSuccess() + getWarn() + getError() + getFatal() + getEvent()} total events.`)
                         log.info(`${getInfo() - 1} info events.`)
                         log.info(`${getSuccess()} successful events.`)
@@ -64,15 +80,10 @@ module.exports = {
                         log.info(`${getError()} error events.`)
                         log.info(`${getFatal()} fatal events.`)
                         log.info(`${getEvent()} general events.`)
-                        log.info(gradient(`--------------------- Nex ${date.getFullYear()} ---------------------`, "#00ffff", "#FF00FF"))
+                        log.info(accent(`--------------------- Nex ${date.getFullYear()} ---------------------`))
                         break;
                     default:
-                        log.info(`Not a valid argument.`)
-                        log.info(`Valid arguments:`)
-                        log.info(`version - Prints version info`)
-                        log.info(`build - Prints ${frameName} build`)
-                        log.info(`logs - Prints the log events.`)
-                        log.info(gradient(`--------------------- Nex ${date.getFullYear()} ---------------------`, "#00ffff", "#FF00FF"))
+                        return false;
                 }
                 return true;
             default:

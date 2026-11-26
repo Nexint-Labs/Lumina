@@ -15,7 +15,7 @@ const { loadHelp } = require("#functions/core/load");
 const { log } = require('#functions/core/log.mjs');
 const { gracefulShutdown, refreshCycle, reload, healthCheck } = require('#functions/core/powerCycle');
 const { spawn } = require('child_process');
-const { gradient } = require('#functions/core/gradient');
+const { primary, accent, lumeAccent } = require('#functions/core/gradient');
 
 module.exports = {
     // Example of a help menu given by the bot.
@@ -31,10 +31,10 @@ module.exports = {
             'Note: Info can\'t be expanded upon by other plugins.',
             '/reload - Reloads the entire app (nearly from scratch)',
             '/refresh - Refreshes commands, etc.',
-            `/restart - Restarts ${frameName}. Recommended when updating.`,
+            `/restart - Restarts ${lumeAccent(frameName)}. Recommended when updating.`,
             '/health - Health checker',
             '/rs - Mirror of /restart',
-            `/stop - Closes ${frameName}.`,
+            `/stop - Closes ${lumeAccent(frameName)}.`,
             '/end - Mirror of /stop.',
         ];
     },
@@ -62,11 +62,23 @@ module.exports = {
                 } else {
                     page = 1;
                 }
-                log.info(gradient(`----------------- Help menu: (${page}/${Math.ceil((helpMenu.length) / 8)}) -----------------`, "#00ffff", "#FF00FF"))
+
+                // forced symmetry get nuked
+                if (page < 10) {
+                    log.info(primary(`----------------- Help menu: (${page}/${Math.ceil((helpMenu.length) / 8)}) -----------------`))
+                } else {
+                    log.info(primary(`----------------- Help menu: (N/A) -----------------`))
+                }
+
+                let countHelp = 0;
                 for (let i = (page - 1) * 8; i < Math.min(8 + ((page - 1) * 8), helpMenu.length); i++) {
                     log.info(helpMenu[i])
+                    countHelp++;
                 }
-                log.info(gradient(`--------------------- Nex ${date.getFullYear()} ---------------------`, "#00ffff", "#FF00FF"))
+                if (countHelp == 0) {
+                    log.info("How did you get here?")
+                }
+                log.info(accent(`--------------------- Nex ${date.getFullYear()} ---------------------`))
                 return true;
             case "/info":
                 let info;
@@ -75,17 +87,17 @@ module.exports = {
                     'The first number (X.0.0) is the major release.',
                     'The second number (0.X.0) is the minor release.',
                     'The third number (0.0.X) is the patch #.',
-                    `Breaking changes may occur between ${frameName} 0.x releases.`,
+                    `Breaking changes may occur between ${lumeAccent(frameName)} 0.x releases.`,
                     'Compatibility is not guaranteed until v1.0.0.',
                     'Built-in plugins aside from "built-in" are typically',
                     'not updated as often, and may be unstable.',
                     'What means what?',
-                    `${frameName} version is the version of the NodeJS framework.`,
+                    `${lumeAccent(frameName)} version is the version of the NodeJS framework.`,
                     `${pluginName} version is the version of the plugins / deployment.`,
                     'Dev is the dev instance, prod is the prod instance.',
                     'Disclaimers:',
                     'Third party plugins are not guaranteed to be supported.',
-                    `${frameName} is in active development and may introduce breaking changes.`,
+                    `${lumeAccent(frameName)} is in active development and may introduce breaking changes.`,
                     'Have fun running this! - Nexint',
                 ];
                 if (command.split(" ")[1] != undefined) {
@@ -96,14 +108,27 @@ module.exports = {
                 } else {
                     info = 1;
                 }
-                log.info(gradient(`----------------- Info menu: (${info}/${Math.ceil((infoList.length) / 8)}) -----------------`, "#00ffff", "#FF00FF"))
+
+                // forced symmetry get nuked
+                if (info < 10) {
+                    log.info(primary(`----------------- Info menu: (${info}/${Math.ceil((infoList.length) / 8)}) -----------------`))
+                } else {
+                    log.info(primary(`----------------- Info menu: (N/A) -----------------`))
+                }
+
+                let countInfo = 0;
                 for (let i = (info - 1) * 8; i < Math.min(8 + ((info - 1) * 8), infoList.length); i++) {
                     log.info(infoList[i])
+                    countInfo++;
                 }
-                log.info(gradient(`--------------------- Nex ${date.getFullYear()} ---------------------`, "#00ffff", "#FF00FF"))
+                if (countInfo == 0) {
+                    log.info("How did you get here?")
+                }
+                log.info(accent(`--------------------- Nex ${date.getFullYear()} ---------------------`))
                 return true;
             case "/end":
             case "/stop":
+            case "/shutdown":
                 await gracefulShutdown("Console // Shutdown", true)
                 return false; // This should not run, but like
             case "/rs":

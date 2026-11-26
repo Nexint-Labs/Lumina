@@ -1,6 +1,7 @@
 const { log } = require("./log.mjs");
 
 const { frameName, frameVer, frameID, updateSource, updateURL } = require('#config/core/framework');
+const { accent, lumeAccent } = require("./gradient");
 
 /**
  * Gets the latest version of this bot!
@@ -53,26 +54,26 @@ const getUpdateVersion = async function () {
 const updateCheck = async function (initial) {
     const check = await getUpdateVersion();
     if (!check) {
-        log.error(`Something went wrong updating ${frameName}!`)
+        log.error(`Something went wrong updating ${lumeAccent(frameName)}!`)
         return;
     }
     const [versionName, latestVersion] = check
 
     if (frameID < latestVersion) {
-        log.warn(`You're running an outdated version of ${frameName}! (You are ${latestVersion - frameID} revisions behind)`)
-        log.warn(`Update now at ${updateURL} to make sure that ${frameName} has the latest security fixes!`)
+        log.warn(`You're running an outdated version of ${lumeAccent(frameName)}! (You are ${latestVersion - frameID} revisions behind)`)
+        log.warn(`Update now at ${updateURL} to make sure that ${lumeAccent(frameName)} has the latest security fixes!`)
         if ((latestVersion - frameID) >= 5) {
             log.warn(`You are over 5 revisions behind. Update to the latest version as soon as possible.`)
         }
         log.warn(`Current version: v${frameVer} / Latest Version: ${versionName}`)
     } else if (latestVersion <= 0) {
-        log.warn(`This instance of ${frameName} is fetching an invalid version.`)
+        log.warn(`This instance of ${lumeAccent(frameName)} is fetching an invalid version.`)
     } else if (frameID > latestVersion) {
-        log.warn(`You're running an experimental version of ${frameName}! (You are ${frameID - latestVersion} revisions ahead)`)
+        log.warn(`You're running an experimental version of ${lumeAccent(frameName)}! (You are ${frameID - latestVersion} revisions ahead)`)
         log.warn(`Here be dragons!~`)
         log.warn(`Current version: v${frameVer} / Latest Version: ${versionName}`)
     } else if (initial) {
-        log.info(`You're running the latest version of ${frameName}!`)
+        log.info(`You're running the latest version of ${lumeAccent(frameName)}!`)
     }
 }
 

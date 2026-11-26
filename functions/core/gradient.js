@@ -2,6 +2,10 @@
 // so I just forced AI to make it.
 
 const { styleText } = require("node:util");
+const { stripVTControlCharacters } = require("node:util");
+const { getConfig } = require("./getConfig");
+const { lumeTheme } = require("#config/core/framework");
+const { theme } = getConfig("cosmetic/config")
 
 /**
  * Apply a linear colour gradient to text.
@@ -33,4 +37,47 @@ const gradient = function (text, from, to) {
     return result;
 }
 
-module.exports = { gradient };
+/**
+ * Bar lol
+ * @param {Number} value 
+ * @param {Number} max 
+ * @param {Number} width 
+ * @returns {String}
+ */
+const bar = function (value, max = 100, width = 32) {
+    const ratio = Math.max(0, Math.min(1, value / max));
+    const filled = Math.round(ratio * width);
+
+    return primary("█".repeat(filled)) + styleText("gray", "░".repeat(width - filled));
+}
+
+/**
+ * Centering
+ * @param {String} text 
+ * @param {Number} width 
+ * @returns {String}
+ */
+const center = function (text, width = 52) {
+    const length = stripVTControlCharacters(text).length;
+    const padding = Math.max(0, width - length);
+
+    return " ".repeat(Math.floor(padding / 2)) + text + " ".repeat(Math.ceil(padding / 2));
+}
+
+const primary = function(text){
+    return gradient(text, theme.primary, theme.secondary)
+}
+
+const accent = function(text){
+    return gradient(text, theme.accent, theme.accentSecondary)
+}
+
+const lumePrimary = function(text){
+    return gradient(text, lumeTheme.primary, lumeTheme.secondary)
+}
+
+const lumeAccent = function(text){
+    return gradient(text, lumeTheme.accent, lumeTheme.accentSecondary)
+}
+
+module.exports = { gradient, bar, center, primary, accent, lumePrimary, lumeAccent };
