@@ -379,7 +379,6 @@ Applications may also define their own import aliases in their `package.json`:
         "#functions/core/*": "@nexint/lumina/core/*",
         "#functions/*": "./functions/*.js",
         "#preload/*": "./preload/*.js",
-        "#console/*": "./console/*.js",
         "#apps/*": "./apps/*.js",
         "#appHelpers/*": "./appHelpers/*.js"
     }

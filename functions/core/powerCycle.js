@@ -5,7 +5,7 @@ const { close, refresh, load, health } = require("./load");
 const { log } = require("./log.mjs");
 const { root, frameworkDir, standalone } = require("#functions/core/dirs");
 const { frameName } = require("#config/core/framework");
-const { gradient } = require("./gradient");
+const { primary, accent } = require("./gradient");
 const { errorPolicy } = getConfig("core/core");
 const { pluginName } = getConfig("cosmetic/config");
 
@@ -32,8 +32,18 @@ const gracefulShutdown = async function (cause, exit) {
     }
     shutDownState = true;
 
+    // make sure it actually shuts down
+    const watchdog = setTimeout(async () => {
+        try {
+            await log.fatal("Shutdown exceeded its timeout. Escalating to forced shut down.", null, 0x0003, true)
+        } catch {
+            process.exit(2)
+        }
+    }, 30_000);
+
     try {
-        log.info(gradient(`--------------------- Nex ${date.getFullYear()} ---------------------`, "#00ffff", "#FF00FF"))
+        log.info(primary(`--------------------- Shutdown ---------------------`))
+        const startShutdown = performance.now()
         log.event(`Shutdown triggered by: ${cause}`)
         log.event("Closing all apps...")
         let success = true;
@@ -61,8 +71,16 @@ const gracefulShutdown = async function (cause, exit) {
         } else {
             log.event("All components closed successfully.");
         }
-        log.event("Shutting down.")
-        log.info(gradient(`----------------------------------------------------`, "#00ffff", "#FF00FF"))
+
+        const elapsed = performance.now() - startShutdown;
+
+        if (elapsed < 1000) {
+            log.success(`Shut down in ${elapsed.toFixed(3)}ms.`);
+        } else {
+            log.success(`Shut down in ${(elapsed / 1000).toFixed(3)}s.`);
+        }
+        log.info(accent(`--------------------- Nex ${date.getFullYear()} ---------------------`))
+        clearTimeout(watchdog);
         shutDownState = false;
         if (exit) {
             if (success) {
@@ -91,8 +109,8 @@ const reload = async function (cause) {
     }
     otherState = true;
     try {
-        log.info(gradient(`---------------------- Reload ----------------------`, "#00ffff", "#FF00FF"))
-        const startReload = Date.now()
+        log.info(primary(`---------------------- Reload ----------------------`))
+        const startReload = performance.now()
         log.event(`Reload triggered by: ${cause}`)
 
         // Closes apps and plugins
@@ -152,9 +170,17 @@ const reload = async function (cause) {
         }
 
         await load("apps", root);
-        log.success(`Reload complete in ${(Date.now() - startReload) / 1000}s!`)
-        log.warn("Note: Reloading is unstable and not explicitly supported. If things don't work, restart.")
-        log.info(gradient(`--------------------- Nex ${date.getFullYear()} ---------------------`, "#00ffff", "#FF00FF"))
+
+        const elapsed = performance.now() - startReload;
+
+        if (elapsed < 1000) {
+            log.success(`Reload complete in ${elapsed.toFixed(3)}ms!`);
+        } else {
+            log.success(`Reload complete in ${(elapsed / 1000).toFixed(3)}s!`);
+        }
+        log.warn("Note: Reloading is unstable and not fully supported.")
+        log.warn("If things don't work, restart.")
+        log.info(accent(`--------------------- Nex ${date.getFullYear()} ---------------------`))
         otherState = false;
         return true;
     } catch (error) {
@@ -175,8 +201,8 @@ const refreshCycle = async function (cause) {
     }
     otherState = true;
     try {
-        log.info(gradient(`------------------- Refresh real --------------------`, "#00ffff", "#FF00FF"))
-        const startRefresh = Date.now()
+        log.info(primary(`------------------- Refresh Apps -------------------`))
+        const startRefresh = performance.now()
         log.event(`Refresh triggered by: ${cause}`)
 
         // Start refreshing
@@ -187,7 +213,9 @@ const refreshCycle = async function (cause) {
         // Clear non framework dirs
         for (const dir of clearedDirs) {
             cleared += clearDirectory(dir, root)
-            cleared += clearDirectory(dir, frameworkDir)
+            if (!standalone) {
+                cleared += clearDirectory(dir, frameworkDir)
+            }
         }
 
         log.success(`Cleared ${cleared} files!`)
@@ -198,12 +226,20 @@ const refreshCycle = async function (cause) {
             await log.fatal("One or more components failed to refresh.", null, 0x0004, true);
             process.exit(1) // again, this shouldnt happen in any circumstance, but just a failsafe :)
         } else {
-            log.success(`Refresh complete in ${(Date.now() - startRefresh) / 1000}s!`)
+
+            const elapsed = performance.now() - startRefresh;
+
+            if (elapsed < 1000) {
+                log.success(`Refresh complete in ${elapsed.toFixed(3)}ms!`);
+            } else {
+                log.success(`Refresh complete in ${(elapsed / 1000).toFixed(3)}s!`);
+            }
         }
 
         // Cleanup
-        log.warn("Note: Refreshing is unstable and not explicitly supported. If things don't work, restart or reload.")
-        log.info(gradient(`--------------------- Nex ${date.getFullYear()} ---------------------`, "#00ffff", "#FF00FF"))
+        log.warn("Note: Refreshing is unstable and not fully supported.")
+        log.warn("If things don't work, restart or reload.")
+        log.info(accent(`--------------------- Nex ${date.getFullYear()} ---------------------`))
         otherState = false;
         return true;
     } catch (error) {
@@ -228,10 +264,10 @@ const healthCheck = async function (cause, quiet = false) {
     healthState = true;
 
     try {
-        const startHealth = Date.now()
+        const startHealth = performance.now()
 
         if (!quiet) {
-            log.info(gradient(`---------------------- Health -----------------------`, "#00ffff", "#FF00FF"))
+            log.info(primary(`---------------------- Health ----------------------`))
             log.event(`Health check triggered by: ${cause}`)
         }
 
@@ -278,13 +314,20 @@ const healthCheck = async function (cause, quiet = false) {
 
         // Determine success or not
         if (success && !quiet) {
-            log.success(`Health check complete in ${(Date.now() - startHealth) / 1000}s!`);
+
+            const elapsed = performance.now() - startHealth;
+
+            if (elapsed < 1000) {
+                log.success(`Health check complete in ${elapsed.toFixed(3)}ms!`);
+            } else {
+                log.success(`Health check complete in ${(elapsed / 1000).toFixed(3)}s!`);
+            }
         }
 
         // Cleanup
 
         if (!quiet) {
-            log.info(gradient(`--------------------- Nex ${date.getFullYear()} ---------------------`, "#00ffff", "#FF00FF"))
+            log.info(accent(`--------------------- Nex ${date.getFullYear()} ---------------------`))
         }
         healthState = false
         return success;

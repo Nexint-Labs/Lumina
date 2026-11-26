@@ -223,4 +223,4 @@ const getFatal = function () {
     return fatalCount
 }
 
-export { log, getInfo, getSuccess, getWarn, getError, getEvent, getFatal, setReadline, print };
+export { log, getInfo, getSuccess, getWarn, getError, getEvent, getFatal, setReadline, print, printErr };

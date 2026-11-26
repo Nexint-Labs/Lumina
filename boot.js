@@ -39,14 +39,15 @@ const { updateCheck } = require('#functions/core/update');
 const { gracefulShutdown } = require('#functions/core/powerCycle');
 
 // Prepare the console
-const readline = require('node:readline');
-const { gradient } = require("#functions/core/gradient");
+const readline = require("node:readline/promises");
+const { center, primary, accent, lumeAccent, lumePrimary } = require("#functions/core/gradient");
+const { forceShutdown } = require("#functions/core/fatalShutdown.mjs");
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
 });
 setReadline(rl);
-const prompt = (query) => new Promise((resolve) => rl.question(query, resolve));
+const prompt = (query) => rl.question(lumePrimary(query));
 
 // Start loading
 const startLoad = Date.now();
@@ -161,12 +162,12 @@ const main = async () => {
     // This makes my API super modular :)
     await load("apps", root);
 
-    log.info(gradient(`--------------------- Nex ${date.getFullYear()} ---------------------`, "#00ffff", "#FF00FF"))
-    log.info(`                ${gradient(`Welcome to ${frameName}!`, "#FF66CC", "#66CCFF")}                  `);
-    log.info(`             You're running version: ${frameVer}             `);
-    log.info("        Stay up to date for the best features.        ");
-    log.info("              Run /help to get started!               ");
-    log.info(gradient(`----------------------------------------------------`, "#00ffff", "#FF00FF"));
+    log.info(primary(`--------------------- Welcome! ---------------------`))
+    log.info(center(`Welcome to ${lumeAccent(frameName)}`));
+    log.info(center(`You're running version: ${lumeAccent(frameVer)}`));
+    log.info(center("Stay up to date for the best features."));
+    log.info(center(`Run ${lumeAccent("/help")} to get started!`));
+    log.info(accent(`--------------------- Nex ${date.getFullYear()} ---------------------`))
     const elapsed = performance.now() - start;
 
     if (elapsed < 1000) {
@@ -174,7 +175,7 @@ const main = async () => {
     } else {
         log.success(`Done in ${(elapsed / 1000).toFixed(3)} seconds!`);
     }
-    
+
     print("Server is running.")
 
     await updateCheck(true)
@@ -206,15 +207,30 @@ const asyncFunctions = async function () {
  * Parses commands
  */
 const commandParser = async () => {
-    while (consoleOpen) {
-        const command = await prompt('> ');
+    try {
+        while (consoleOpen) {
+            const command = await prompt('> ');
 
-        // why am i doing this
-        if (!(await loadConsole("console", command, frameworkDir))) {
-            if (standalone || !(await loadConsole("console", command, root))) {
-                log.info("This command is not valid.")
+            if (command.trim()) {
+                if (!standalone && await loadConsole("console", command, root)) {
+                    continue;
+                }
+
+                if (await loadConsole("console", command, frameworkDir)) {
+                    continue;
+                }
             }
+
+            // why am i doing this
+            log.info("This command is not valid.")
+            log.info("Tip: Run /help to see all commands!")
+            
+            continue;
         }
+
+    } catch (error) {
+        consoleOpen = false;
+        await log.fatal(`The console input is unstable. Shutting down early.`, error, 0x0001, true)
     }
 }
 

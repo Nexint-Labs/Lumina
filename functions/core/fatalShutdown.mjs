@@ -6,6 +6,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
 import dirs from "#functions/core/dirs";
+import { clearLine, cursorTo } from "node:readline";
 
 const { root, frameworkDir, standalone } = dirs;
 
@@ -137,8 +138,16 @@ const forceShutdown = async function (cause) {
         }
         process.exit(1);
     }, SHUTDOWN_TIMEOUT);
+    try {
+        if (process.stdout.isTTY) {
+            clearLine(process.stdout, 0);
+            cursorTo(process.stdout, 0);
+        }
+    } catch {
+        // no prompt get nuked
+    }
 
-    log.info(`\x1b[36m--------------------- Nex ${date.getFullYear()} ---------------------\x1b[0m`)
+    log.info(`\x1b[36m------------------ Force Shutdown ------------------\x1b[0m`)
     log.event(`Forced Shutdown triggered by: ${cause}`)
     log.event("Closing all apps...")
     try {
@@ -167,7 +176,7 @@ const forceShutdown = async function (cause) {
         process.exit(1);
     }
     log.event("Shutting down.")
-    log.info(`\x1b[36m----------------------------------------------------\x1b[0m`)
+    log.info(`\x1b[36m--------------------- Nex ${date.getFullYear()} ---------------------\x1b[0m`)
     process.exit(1);
 }
 
