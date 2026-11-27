@@ -204,7 +204,7 @@ const reload = async function (cause) {
 }
 
 /**
- * Refreshes the Discord part lol
+ * Refreshes application components.
  * @returns 
  */
 const refreshCycle = async function (cause) {
