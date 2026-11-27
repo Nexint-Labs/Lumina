@@ -1,4 +1,4 @@
-const { readline } = require("#index");
+const { readline } = require("#boot");
 
 module.exports = {
     async health() {

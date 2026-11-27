@@ -27,7 +27,7 @@
     "#functions/*": "./functions/*.js",
     "#functions/*.mjs": "./functions/*.mjs",
     "#preload/*": "./preload/*.js",
-    "#index": "./boot.js"
+    "#boot": "./boot.js"
   },
   "repository": {
     "type": "git",
