@@ -1,3 +1,2 @@
-#!/bin/bash
-. /home/backend/.nvm/nvm.sh
+#!/bin/sh
 npm start

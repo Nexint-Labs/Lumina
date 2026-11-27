@@ -116,8 +116,8 @@ const load = async function (dir, root) {
 }
 
 /**
- * Load console files
- * This runs the console function.
+ * Load command files
+ * This runs the command function.
  * @param {String} dir 
  * @param {String} command 
  * @param {String} [root] - Defaults to the working directory.

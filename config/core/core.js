@@ -13,7 +13,6 @@ module.exports = {
     restart: process.platform === "win32"
         ? "start start.bat"
         : "sh start.sh", // Restart command. This would be different on a linux based system. It would be "sh start.sh".
-    // args: ['--', 'bash', '-c', "./start.sh"],
 
     /*
     It's in your best interest to not change this unless you know what you're doing.

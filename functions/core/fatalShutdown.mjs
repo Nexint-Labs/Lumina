@@ -87,7 +87,7 @@ const close = async function (dir, root = process.cwd()) {
         // Only load JS files (trust)
         if ([".js", ".cjs", ".mjs"].includes(path.extname(file).toLowerCase())) {
 
-            // Load the help menu?
+            // Close cache
             try {
                 const filename = require.resolve(path.join(root, dir, file));
                 const cached = require.cache[filename];

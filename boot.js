@@ -178,7 +178,7 @@ const init = async function () {
 
 /**
  * Main function
- * This is the main function that runs the entire backend.
+ * This is the main function that runs Lumina.
  * what am i doing bro :sob:
  */
 const main = async () => {
@@ -196,7 +196,7 @@ const main = async () => {
     }
 
     // Load the apps (FINALLY?)
-    // This makes my API super modular :)
+    // This makes Lumina super modular :)
     await load("apps", root);
 
     log.info(primary(dashCenter("Welcome!")))
