@@ -8,7 +8,7 @@ const { devMode, allowEval } = getConfig("core/core");
 const exec = promisify(require("node:child_process").exec);
 
 module.exports = {
-    disable: !devMode && !allowEval,
+    disable: !devMode || !allowEval,
     // Example of a help menu given by the bot.
     // Input: none
     // Expected Return: An array of strings.
