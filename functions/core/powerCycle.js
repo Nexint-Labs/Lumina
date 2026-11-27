@@ -20,11 +20,6 @@ let healthState = false;
  * @param {Boolean} exit 
  */
 const gracefulShutdown = async function (cause, exit) {
-    const { readline } = require("#boot");
-    readline.setPrompt("");
-    readline.line = "";
-    readline.cursor = 0;
-    readline.prompt(true);
 
     if (shutDownState) {
         await log.fatal(`Additional shutdown requested during active shutdown. Escalating to forced shutdown. Cause: ${cause}`, null, 0x0004, true);
@@ -47,6 +42,13 @@ const gracefulShutdown = async function (cause, exit) {
     }, 30_000);
 
     try {
+
+        const { readline } = require("#boot");
+        readline.setPrompt("");
+        readline.line = "";
+        readline.cursor = 0;
+        readline.prompt(true);
+        
         log.info(primary(dashCenter(`Shutdown`)))
         const startShutdown = performance.now()
         log.event(`Shutdown triggered by: ${cause}`)
