@@ -57,6 +57,12 @@ This README was primarily generated with AI and updated with AI assistance.
 
 Node.js 24 or later is recommended. Some features may require newer versions of Node.js. Earlier versions have not been tested.
 
+## History
+
+Lumina started off as [OpenBot](https://github.com/Nexint-Labs/Open-Bot), a Discord bot framework that has since been archived.
+
+Lumina has since descended from [MikuBot](https://github.com/Nexint-Labs/Mikubot), [Prism](https://github.com/Nexint-Labs/Prism-old), and then has been forked off into a general all in one framework.
+
 ### Security
 
 Lumina executes discovered modules within the host Node.js process. Applications, plugins, preloads and console commands are not sandboxed.
