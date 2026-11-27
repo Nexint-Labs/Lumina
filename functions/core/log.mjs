@@ -4,7 +4,6 @@ const { dateOptions } = getConfig("core/core");
 import { styleText, inspect } from "node:util";
 import { forceShutdown } from "./fatalShutdown.mjs";
 import { writeLogFile } from "#preload/core/fileLog";
-import { clearLine, cursorTo, moveCursor, clearScreenDown } from "node:readline";
 
 /**
  * @type {import("node:readline").Interface | null}
@@ -50,18 +49,8 @@ const setReadline = function (instance) {
             return
         };
 
-        try {
-            if (process.stdout.isTTY) {
-                const { rows } = instance.getCursorPos();
-
-                moveCursor(process.stdout, 0, -rows);
-                cursorTo(process.stdout, 0);
-                clearScreenDown(process.stdout);
-            }
-        } finally {
-            rl = null;
-            closeHandler = null;
-        }
+        rl = null;
+        closeHandler = null;
     };
 
     instance.once("close", closeHandler);
@@ -75,18 +64,30 @@ const setReadline = function (instance) {
 const printHelper = function (output, ...args) {
     const interactive = rl && !rl.closed && process.stdout.isTTY;
 
-    if (interactive) {
-        const { rows } = rl.getCursorPos();
-
-        moveCursor(process.stdout, 0, -rows);
-        cursorTo(process.stdout, 0);
-        clearScreenDown(process.stdout);
+    if (!interactive) {
+        output(...args);
+        return;
     }
+
+    const prompt = rl.getPrompt();
+    const line = rl.line;
+    const cursor = rl.cursor;
+
+    // Let readline erase its own rendering.
+    rl.setPrompt("");
+    rl.write(null, { ctrl: true, name: "e" });
+    rl.write(null, { ctrl: true, name: "u" });
 
     output(...args);
 
-    if (interactive) {
-        rl.prompt(true);
+    // Restore the prompt and input.
+    rl.setPrompt(prompt);
+    rl.prompt();
+    rl.write(line);
+
+    // Restore the original cursor position.
+    for (const _ of line.slice(cursor)) {
+        rl.write(null, { name: "left" });
     }
 };
 
