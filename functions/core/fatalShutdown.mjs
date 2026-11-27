@@ -36,7 +36,6 @@ const log = {
      * @param {Error} error 
      */
     error: function (text, error) {
-
         const messages = [
             `[ERROR] [${DateFormatter.format(Date.now())}] ${text}`,
         ]

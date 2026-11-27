@@ -4,7 +4,7 @@ const { dateOptions } = getConfig("core/core");
 import { styleText, inspect } from "node:util";
 import { forceShutdown } from "./fatalShutdown.mjs";
 import { writeLogFile } from "#preload/core/fileLog";
-import { clearLine, cursorTo } from "node:readline";
+import { clearLine, cursorTo, moveCursor, clearScreenDown } from "node:readline";
 
 /**
  * @type {import("node:readline").Interface | null}
@@ -50,13 +50,18 @@ const setReadline = function (instance) {
             return
         };
 
-        if (process.stdout.isTTY) {
-            clearLine(process.stdout, 0);
-            cursorTo(process.stdout, 0);
-        }
+        try {
+            if (process.stdout.isTTY) {
+                const { rows } = instance.getCursorPos();
 
-        rl = null;
-        closeHandler = null;
+                moveCursor(process.stdout, 0, -rows);
+                cursorTo(process.stdout, 0);
+                clearScreenDown(process.stdout);
+            }
+        } finally {
+            rl = null;
+            closeHandler = null;
+        }
     };
 
     instance.once("close", closeHandler);
@@ -68,11 +73,14 @@ const setReadline = function (instance) {
  * @param  {...any} args 
  */
 const printHelper = function (output, ...args) {
-    const interactive = rl && process.stdout.isTTY;
+    const interactive = rl && !rl.closed && process.stdout.isTTY;
 
     if (interactive) {
-        clearLine(process.stdout, 0);
+        const { rows } = rl.getCursorPos();
+
+        moveCursor(process.stdout, 0, -rows);
         cursorTo(process.stdout, 0);
+        clearScreenDown(process.stdout);
     }
 
     output(...args);

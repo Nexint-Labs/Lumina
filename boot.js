@@ -30,6 +30,7 @@ const { log, setReadline, print } = require('#functions/core/log.mjs');
 log.event(`Loading configs...`)
 const { autoUpdate, errorPolicy, devMode, devMsg, verbose } = getConfig("core/core");
 const { tips } = getConfig("cosmetic/tips");
+const { consolePrompt } = getConfig("cosmetic/config");
 const { frameVer, frameName } = require('#config/core/framework');
 const { load, loadConsole } = require('#functions/core/load');
 const delay = require("#functions/core/delay");
@@ -42,12 +43,13 @@ const { gracefulShutdown } = require('#functions/core/powerCycle');
 // Prepare the console
 const readline = require("node:readline/promises");
 const { center, primary, accent, lumeAccent, lumePrimary, dashCenter } = require("#functions/core/gradient");
+const { log: fatalLog } = require("#functions/core/fatalShutdown.mjs")
 const rl = readline.createInterface({
     input: process.stdin,
-    output: process.stdout
+    output: process.stdout,
+    prompt: primary(consolePrompt)
 });
-setReadline(rl);
-const prompt = (query) => rl.question(lumePrimary(query));
+const prompt = () => rl.question(rl.getPrompt());
 
 // Start loading
 const startLoad = Date.now();
@@ -80,8 +82,20 @@ const handleUncaughtError = async function (type, error, origin, policy) {
             await log.fatal(`An uncaught ${type} has happened.`, error, 0x0000, true);
             process.exit(1); // KNOWN: If there are multiple uncaught errors, your program is probably cooked anyways. Good luck!
         }
-    } catch {
-        process.exit(2); // this shouldnt run but i have it
+    } catch (handlerError) {
+        try {
+            fatalLog.error(`Multiple runtime errors have occurred.`);
+            fatalLog.error(`1) An uncaught ${type} has happened.`, error);
+            fatalLog.error("2) Emergency error handler failed:", handlerError);
+            process.exit(2);
+        } catch (e) {
+            console.error("Multiple cascading logging errors have happened:");
+            console.error("1) Original error:", error);
+            console.error("2) Handler error:", handlerError);
+            console.error("3) Emergency logger error:", e);
+            console.error("TIP: You are fried.");
+            process.exit(3); // i swear if this somehow runs ur fried
+        }
     }
 }
 
@@ -214,6 +228,7 @@ init().catch(async error => {
  * These functions are deliberately async'd
  */
 const asyncFunctions = async function () {
+    setReadline(rl);
     commandParser();
     if (autoUpdate) {
         autoUpdateCheck();
@@ -229,7 +244,7 @@ const asyncFunctions = async function () {
 const commandParser = async () => {
     try {
         while (consoleOpen) {
-            const command = await prompt('> ');
+            const command = await prompt();
 
             if (command.trim()) {
                 if (!standalone && await loadConsole("console", command, root)) {

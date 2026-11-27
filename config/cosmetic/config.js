@@ -6,5 +6,6 @@ module.exports = {
         secondary: "#FF00FF",
         accent: "#FF66CC",
         accentSecondary: "#66CCFF"
-    }
+    },
+    consolePrompt: "Lumina > "
 }
