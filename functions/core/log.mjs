@@ -18,13 +18,20 @@ let closeHandler = null;
 
 /**
  * Register or detach the readline interface.
+ * mr chatgpt over here made this method and that has some wack conventions ok
  * @param {import("node:readline").Interface | null} instance
  */
 const setReadline = function (instance) {
-    instance = instance?.closed ? null : instance;
+
+    // normalization
+    if (instance?.closed) {
+        instance = null;
+    }
 
     // Avoid registering the same interface twice.
-    if (rl === instance) return;
+    if (rl === instance) {
+        return;
+    }
 
     // Remove the cleanup listener from the previous interface.
     if (rl && closeHandler) {
@@ -34,10 +41,14 @@ const setReadline = function (instance) {
     rl = instance;
     closeHandler = null;
 
-    if (!instance) return;
+    if (!instance) {
+        return
+    };
 
     closeHandler = function () {
-        if (rl !== instance) return;
+        if (rl !== instance) {
+            return
+        };
 
         if (process.stdout.isTTY) {
             clearLine(process.stdout, 0);
@@ -100,14 +111,10 @@ const log = {
      */
     success: function (text) {
 
-        const messages = [
-            `[SUCCESS] [${DateFormatter.format(Date.now())}] ${text}`,
-        ]
+        const message = `[SUCCESS] [${DateFormatter.format(Date.now())}] ${text}`;
 
-        for (const message of messages) {
-            print(styleText("greenBright", message))
-            writeLogFile(message)
-        }
+        print(styleText("greenBright", message));
+        writeLogFile(message);
         successCount += 1;
     },
 
@@ -117,14 +124,10 @@ const log = {
      */
     event: function (text) {
 
-        const messages = [
-            `[EVENT] [${DateFormatter.format(Date.now())}] ${text}`,
-        ]
+        const message = `[EVENT] [${DateFormatter.format(Date.now())}] ${text}`
 
-        for (const message of messages) {
-            print(styleText("blueBright", message))
-            writeLogFile(message)
-        }
+        print(styleText("blueBright", message))
+        writeLogFile(message)
         eventCount += 1;
     },
 
@@ -134,14 +137,10 @@ const log = {
      */
     warn: function (text) {
 
-        const messages = [
-            `[WARN] [${DateFormatter.format(Date.now())}] ${text}`,
-        ]
+        const message = `[WARN] [${DateFormatter.format(Date.now())}] ${text}`
 
-        for (const message of messages) {
-            print(styleText("yellowBright", message))
-            writeLogFile(message)
-        }
+        print(styleText("yellowBright", message))
+        writeLogFile(message)
         warnCount += 1;
     },
 
@@ -152,14 +151,10 @@ const log = {
      */
     error: function (text, error) {
 
-        const messages = [
-            `[ERROR] [${DateFormatter.format(Date.now())}] ${text}`,
-        ]
+        const message = `[ERROR] [${DateFormatter.format(Date.now())}] ${text}`;
 
-        for (const message of messages) {
-            printErr(styleText("redBright", message))
-            writeLogFile(message)
-        }
+        printErr(styleText("redBright", message))
+        writeLogFile(message)
 
         if (error) {
             printErr(error)
@@ -183,18 +178,20 @@ const log = {
      */
     fatal: async function (text, error, code = 0x0000, shutdown = false) {
 
+        const timestamp = DateFormatter.format(Date.now());
+
         fatalCount += 1;
         const hexCode = `0x${code.toString(16).toUpperCase().padStart(4, "0")}`;
 
         const messages = [
-            `[FATAL] [${DateFormatter.format(Date.now())}] ${text}`,
-            `[FATAL] [${DateFormatter.format(Date.now())}] Code: ${hexCode}`,
-            `[FATAL] [${DateFormatter.format(Date.now())}] Info Events: ${infoCount}`,
-            `[FATAL] [${DateFormatter.format(Date.now())}] Success Events: ${successCount}`,
-            `[FATAL] [${DateFormatter.format(Date.now())}] Warn Events: ${warnCount}`,
-            `[FATAL] [${DateFormatter.format(Date.now())}] Error Events: ${errorCount}`,
-            `[FATAL] [${DateFormatter.format(Date.now())}] Fatal Events: ${fatalCount}`,
-            `[FATAL] [${DateFormatter.format(Date.now())}] General Events: ${eventCount}`,
+            `[FATAL] [${timestamp}] ${text}`,
+            `[FATAL] [${timestamp}] Code: ${hexCode}`,
+            `[FATAL] [${timestamp}] Info Events: ${infoCount}`,
+            `[FATAL] [${timestamp}] Success Events: ${successCount}`,
+            `[FATAL] [${timestamp}] Warn Events: ${warnCount}`,
+            `[FATAL] [${timestamp}] Error Events: ${errorCount}`,
+            `[FATAL] [${timestamp}] Fatal Events: ${fatalCount}`,
+            `[FATAL] [${timestamp}] General Events: ${eventCount}`,
         ]
 
         for (const message of messages) {

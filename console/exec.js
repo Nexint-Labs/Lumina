@@ -4,11 +4,11 @@ const { primary, accent, dashCenter } = require('#functions/core/gradient');
 const { promisify } = require("node:util");
 
 const { getConfig } = require("#functions/core/getConfig");
-const { devMode } = getConfig("core/core");
+const { devMode, allowEval } = getConfig("core/core");
 const exec = promisify(require("node:child_process").exec);
 
 module.exports = {
-    disable: !devMode,
+    disable: !devMode && !allowEval,
     // Example of a help menu given by the bot.
     // Input: none
     // Expected Return: An array of strings.

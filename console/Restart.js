@@ -51,7 +51,7 @@ module.exports = {
                     helpMenu = helpMenu.concat(await loadHelp("console", root));
                 }
 
-                helpMenu = await loadHelp("console", frameworkDir);
+                helpMenu = helpMenu.concat(await loadHelp("console", frameworkDir));
 
                 // Help Menu
                 let page;

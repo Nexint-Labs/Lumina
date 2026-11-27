@@ -42,7 +42,6 @@ const { gracefulShutdown } = require('#functions/core/powerCycle');
 // Prepare the console
 const readline = require("node:readline/promises");
 const { center, primary, accent, lumeAccent, lumePrimary, dashCenter } = require("#functions/core/gradient");
-const { forceShutdown } = require("#functions/core/fatalShutdown.mjs");
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
@@ -64,39 +63,43 @@ module.exports = {
     readline: rl,
 }
 
+/**
+ * Handle Uncaught Errors lol
+ * @param {String} type 
+ * @returns 
+ */
+const handleUncaughtError = async function (type, error, origin, policy) {
+    try {
+        if (policy === "warn") {
+            log.error(`An uncaught ${type} has happened`, error)
+            log.error(origin)
+            return;
+        }
+        if (policy !== "continue") {
+            log.error(origin)
+            await log.fatal(`An uncaught ${type} has happened.`, error, 0x0000, true);
+            process.exit(1); // KNOWN: If there are multiple uncaught errors, your program is probably cooked anyways. Good luck!
+        }
+    } catch {
+        process.exit(2); // this shouldnt run but i have it
+    }
+}
+
 // Process.on random unhandled stuff
 process.on('uncaughtException', async (error, origin) => {
-    try {
-        if (errorPolicy.uncaughtException === "warn") {
-            log.error("An uncaught exception has happened", error)
-            log.error(origin)
-            return;
-        }
-        if (errorPolicy.uncaughtException !== "continue") {
-            log.error(origin)
-            await log.fatal("An uncaught exception has happened.", error, 0x0000, true);
-            process.exit(1); // this shouldnt run but i have it
-        }
-    } catch {
-        process.exit(2); // this shouldnt run but i have it
+    await handleUncaughtError("exception", error, origin, errorPolicy.uncaughtException)
+});
+process.on("unhandledRejection", async (reason, promise) => {
+    await handleUncaughtError("rejection", reason, promise, errorPolicy.unhandledRejection)
+})
+process.on("warning", (warning) => {
+    log.warn(`${warning.name}: ${warning.message}`);
+});
+process.on("worker", (worker) => {
+    if (verbose) {
+        log.info(`Worker thread ${worker.threadId} created.`);
     }
 });
-process.on("unhandledRejection", async (error, origin) => {
-    try {
-        if (errorPolicy.unhandledRejection === "warn") {
-            log.error("An uncaught promised rejection has happened", error)
-            log.error(origin)
-            return;
-        }
-        if (errorPolicy.unhandledRejection !== "continue") {
-            log.error(origin)
-            await log.fatal("An uncaught promised rejection has happened.", error, 0x0000, true);
-            process.exit(1); // this shouldnt run but i have it
-        }
-    } catch {
-        process.exit(2); // this shouldnt run but i have it
-    }
-})
 
 const init = async function () {
 
@@ -118,21 +121,32 @@ const init = async function () {
         }
     });
 
-    // Windows specific patch im ticked off bro
-    // Screw you microsoft :sob:
+    // Windows specific patch what please microsoft adopt linux standards what are you doing
     if (process.platform === "win32") {
         rl.on("SIGINT", function () {
             process.emit("SIGINT");
         });
+        process.on("SIGBREAK", async () => {
+            await gracefulShutdown("Ctrl-Break", true);
+        });
     }
 
-    // Sigint / Sigterm (real)
+    // Sigint / Sigterm / Sighup (real)
     process.on('SIGINT', async () => {
         await gracefulShutdown("Ctrl-C", true)
     })
     process.on('SIGTERM', async () => {
         await gracefulShutdown("OS Termination", true)
     })
+    process.on("SIGHUP", async () => {
+
+        // WHY MORE WINDOWS SPECIFIC BEHAVIOR AAAAAA
+        if (process.platform === "win32") {
+            await gracefulShutdown("Console Closed", true);
+        } else {
+            log.event("SIGHUP received.");
+        }
+    });
 
     main().catch(async error => {
         await log.fatal(`${frameName} failed to initialize external files.`, error, 0x0001, true);

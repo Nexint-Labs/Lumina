@@ -72,7 +72,7 @@ const center = function (text, width = 52) {
  */
 const dashCenter = function (text, width = 52) {
     const length = stripVTControlCharacters(text).length;
-    const padding = Math.max(1, width - length);
+    const padding = Math.max(2, width - length);
 
     return "-".repeat(Math.floor(padding / 2) - 1) + ` ${text} ` + "-".repeat(Math.ceil(padding / 2) - 1);
 }
