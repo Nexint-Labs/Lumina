@@ -55,6 +55,7 @@ module.exports = {
                 if (!success) {
                     process.exit(1);
                 }
+                process.exit(0);
             case "/refresh":
                 await refreshCycle("Console // Refresh")
                 return true;

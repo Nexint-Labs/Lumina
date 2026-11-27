@@ -93,7 +93,7 @@ module.exports = {
                         log.info(`${counts.warn} warning events.`)
                         log.info(`${counts.error} error events.`)
                         log.info(`${counts.fatal} fatal events.`)
-                        log.info(`${counts.eent} general events.`)
+                        log.info(`${counts.event} general events.`)
                         log.info(accent(dashCenter(`Nex ${date.getFullYear()}`)))
                         break;
                     default:
