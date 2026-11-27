@@ -28,7 +28,7 @@ if (!process.env.PRISM_LOG_FORMAT) {
 const { log, setReadline, print } = require('#functions/core/log.mjs');
 
 log.event(`Loading configs...`)
-const { autoUpdate, errorPolicy, devMode, devMsg } = getConfig("core/core");
+const { autoUpdate, errorPolicy, devMode, devMsg, verbose } = getConfig("core/core");
 const { tips } = getConfig("cosmetic/tips");
 const { frameVer, frameName } = require('#config/core/framework');
 const { load, loadConsole } = require('#functions/core/load');
