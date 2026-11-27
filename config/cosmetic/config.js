@@ -7,5 +7,6 @@ module.exports = {
         accent: "#FF66CC",
         accentSecondary: "#66CCFF"
     },
-    consolePrompt: "Lumina > "
+    consolePrompt: "Lumina > ",
+    spacing: 1, // Readability update. Spacing :)
 }

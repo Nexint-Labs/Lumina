@@ -218,7 +218,7 @@ const main = async () => {
         log.success(`Done in ${(elapsed / 1000).toFixed(3)} seconds!`);
     }
 
-    print("Server is running.")
+    print(`${frameName} is running.`)
 
     updateCheck(true)
 

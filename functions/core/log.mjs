@@ -1,6 +1,7 @@
 import config from "#functions/core/getConfig";
 const { getConfig } = config;
 const { dateOptions } = getConfig("core/core");
+const { spacing } = getConfig("cosmetic/config");
 import { styleText, inspect } from "node:util";
 import { forceShutdown } from "./fatalShutdown.mjs";
 import { writeLogFile } from "#preload/core/fileLog";
@@ -25,8 +26,10 @@ let logState = null
  * @param {String} type 
  */
 const logSpace = function (type) {
-    if (logState != null && logState !== type) {
-        print();
+    if (logState != null && logState !== type && Number.isSafeInteger(spacing)) {
+        for(let i = 0; i < spacing; i++){
+            print();
+        }
     }
     logState = type;
 }
@@ -37,10 +40,9 @@ const logSpace = function (type) {
  * @param {import("node:readline").Interface | null} instance
  */
 const setReadline = function (instance) {
-
     
-    if (logState != null && logState !== "info") {
-        logState = "info"
+    if (logState != null) {
+        logState = null
     }
 
     // normalization

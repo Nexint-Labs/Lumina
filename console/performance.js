@@ -4,7 +4,7 @@ const { log } = require('#functions/core/log.mjs');
 const { cpuPerf, memPerf, eventPerf } = require('#preload/core/perf');
 
 module.exports = {
-    // Example of a help menu given by the bot.
+    // Example of a help menu given by Lumina
     // Input: none
     // Expected Return: An array of strings.
     help() {
@@ -17,8 +17,8 @@ module.exports = {
             'This checks the current process only*',
         ];
     },
-    // Example of a command in the CLI (command line) of the bot.
-    // Input: command given by the bot, readline function, client
+    // Example of a command in the CLI (command line) of Lumina
+    // Input: command given by Lumina
     // Expected Return: true or false depending on if the command was valid or not. Otherwise, this breaks the code used to determine if a command is valid or not.
     async command(command) {
         switch (command.split(" ")[0].toLowerCase()) {
