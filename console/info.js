@@ -1,12 +1,7 @@
 // Sample code to import a client and other constants.
-/*
-const { restart } = require('../../config.js');
-const { helpMenu, readline, spawn, exitHandler, server } = require('../../index.js');
-const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
-*/
 const { frameName } = require('#config/core/framework');
 const { getConfig } = require("#functions/core/getConfig");
-const { pluginName } = getConfig("cosmetic/config");
+const { appName } = getConfig("cosmetic/config");
 const { date } = require("#functions/core/date");
 const { frameworkDir, standalone, root } = require("#functions/core/dirs");
 const { loadHelp } = require("#functions/core/load");
@@ -79,7 +74,7 @@ module.exports = {
                     'not updated as often, and may be unstable.',
                     'What means what?',
                     `${lumeAccent(frameName)} version is the version of the NodeJS framework.`,
-                    `${pluginName} version is the version of the plugins / deployment.`,
+                    `${appName} version is the version of the plugins / deployment.`,
                     'Dev is the dev instance, prod is the prod instance.',
                     'Disclaimers:',
                     'Third party plugins are not guaranteed to be supported.',

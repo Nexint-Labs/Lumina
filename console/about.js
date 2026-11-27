@@ -1,6 +1,6 @@
 const { frameName, frameVer, frameID } = require('#config/core/framework');
 const { getConfig } = require("#functions/core/getConfig");
-const { pluginName, pluginVer } = getConfig("cosmetic/config");
+const { appName, appVer } = getConfig("cosmetic/config");
 const { date } = require('#functions/core/date');
 const { log, getInfo, getSuccess, getWarn, getError, getFatal, getEvent } = require('#functions/core/log.mjs');
 const { getUpdateVersion } = require('#functions/core/update');
@@ -36,10 +36,10 @@ module.exports = {
                         log.info(primary(dashCenter(`Version Info`)))
                         const [, latestVersion] = await getUpdateVersion() || [];
                         log.info("Printing the version...")
-                        if (pluginName === "N/A") {
+                        if (appName === "N/A") {
                             log.info(`No apps installed.`)
                         } else {
-                            log.info(`${primary(pluginName)} Version: ${primary(pluginVer)}`)
+                            log.info(`${primary(appName)} Version: ${primary(appVer)}`)
                         }
                         if (latestVersion !== undefined) {
                             log.info(`${lumeAccent(frameName)} Version: ${lumeAccent(frameVer)} (ID: ${frameID} / Latest: ${latestVersion}).`)
@@ -61,10 +61,10 @@ module.exports = {
                     case 'build':
                         log.info(primary(dashCenter(`Build Info`)))
                         log.info(`Printing the build!`)
-                        if (pluginName === "N/A") {
+                        if (appName === "N/A") {
                             log.info(`No apps installed.`)
                         } else {
-                            log.info(`${primary(pluginName)} v${primary(pluginVer)}`)
+                            log.info(`${primary(appName)} v${primary(appVer)}`)
                         }
                         log.info(`${lumeAccent(frameName)} v${lumeAccent(frameVer)}`)
                         log.info(accent(dashCenter(`Nex ${date.getFullYear()}`)))

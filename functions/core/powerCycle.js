@@ -7,14 +7,14 @@ const { root, frameworkDir, standalone } = require("#functions/core/dirs");
 const { frameName } = require("#config/core/framework");
 const { primary, accent, dashCenter } = require("./gradient");
 const { errorPolicy } = getConfig("core/core");
-const { pluginName } = getConfig("cosmetic/config");
+const { appName } = getConfig("cosmetic/config");
 
 let shutDownState = null;
 let otherState = null;
 let healthState = false;
 
 /**
- * Graceful Shutdown of bot
+ * Graceful Shutdown of Lumina
  * Exit: Determines if the process exits immediately or not.
  * @param {String} cause 
  * @param {Boolean} exit 
@@ -317,9 +317,9 @@ const healthCheck = async function (cause, quiet = false) {
         // Determine success or not
         if (!externalSuccess) {
             if (errorPolicy.healthPolicy == "warn") {
-                log.warn(`One or more ${pluginName} components failed the heartbeat.`)
+                log.warn(`One or more ${appName} components failed the heartbeat.`)
             } else if (errorPolicy.healthPolicy !== "continue") {
-                await log.fatal(`One or more ${pluginName} components failed the heartbeat.`, null, 0x0004, true);
+                await log.fatal(`One or more ${appName} components failed the heartbeat.`, null, 0x0004, true);
                 process.exit(1);
             }
         }

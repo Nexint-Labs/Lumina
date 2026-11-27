@@ -4,7 +4,7 @@ const { frameName, frameVer, frameID, updateSource, updateURL } = require('#conf
 const { accent, lumeAccent } = require("./gradient");
 
 /**
- * Gets the latest version of this bot!
+ * Gets the latest version of this Lumina!
  * @returns 
  */
 const getUpdateVersion = async function () {
@@ -39,7 +39,7 @@ const getUpdateVersion = async function () {
         }
     } catch (error) {
         log.error("An error happened while trying to check for updates!")
-        log.error("Likely caused by the bot being unable to access Github. Full stack trace:", error)
+        log.error(`Likely caused by ${lumeAccent(frameName)} being unable to access Github. Full stack trace:`, error)
         return 0;
     }
 };

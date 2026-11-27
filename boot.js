@@ -22,8 +22,8 @@ try {
 const { getConfig } = require("#functions/core/getConfig");
 const { logFormat } = getConfig("core/log");
 
-if (!process.env.PRISM_LOG_FORMAT) {
-    process.env.PRISM_LOG_FORMAT = logFormat
+if (!process.env.LUMINA_LOG_FORMAT) {
+    process.env.LUMINA_LOG_FORMAT = logFormat
 }
 const { log, setReadline, print } = require('#functions/core/log.mjs');
 

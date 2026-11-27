@@ -5,7 +5,7 @@ const path = require("node:path");
 const { log, forceShutdown } = require("../../functions/core/fatalShutdown.mjs");
 const { frameName } = require("#config/core/framework");
 
-let logFormat = process.env.PRISM_LOG_FORMAT;
+let logFormat = process.env.LUMINA_LOG_FORMAT;
 
 
 let outputFileStream = {

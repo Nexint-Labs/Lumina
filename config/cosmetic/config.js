@@ -1,6 +1,6 @@
 module.exports = {
-    pluginName: "N/A",
-    pluginVer: "N/A",
+    appName: "N/A",
+    appVer: "N/A",
     theme: {
         primary: "#00FFFF",
         secondary: "#FF00FF",
@@ -9,4 +9,8 @@ module.exports = {
     },
     consolePrompt: "Lumina > ",
     spacing: 1, // Readability update. Spacing :)
+
+    // Legacy, remove "later" (never)
+    pluginName: appName,
+    pluginVer: appVer,
 }

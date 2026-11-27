@@ -118,7 +118,7 @@ const close = async function (dir, root = process.cwd()) {
 let shutDownState = null;
 
 /**
- * Force Shutdown of bot
+ * Force Shutdown of Lumina
  * @param {String} cause 
  */
 const forceShutdown = async function (cause) {
