@@ -57,8 +57,33 @@ const setReadline = function (instance) {
 };
 
 // Helper functions
-const print = (...args) => console.log(...args);
-const printErr = (...args) => console.error(...args);
+const printHelper = (output, ...args) => {
+    if (!rl || rl.closed || !process.stdout.isTTY) {
+        output(...args);
+        return;
+    }
+
+    const prompt = rl.getPrompt();
+    const line = rl.line;
+    const cursor = rl.cursor;
+
+    rl.setPrompt("");
+    rl.line = "";
+    rl.cursor = 0;
+    rl.prompt(true);
+
+    try {
+        output(...args);
+    } finally {
+        rl.setPrompt(prompt);
+        rl.line = line;
+        rl.cursor = cursor;
+        rl.prompt(true);
+    }
+};
+
+const print = (...args) => printHelper(console.log, ...args);
+const printErr = (...args) => printHelper(console.error, ...args);
 
 const DateFormatter = new Intl.DateTimeFormat(undefined, dateOptions)
 let infoCount = 0;
