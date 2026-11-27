@@ -26,16 +26,13 @@ const loadLogFile = async function () {
     if (outputFileStream instanceof fs.WriteStream && !outputFileStream.destroyed) {
         return;
     }
-    const dirs = [logDir];
-    dirs.forEach((dir) => {
-        if (!fs.existsSync(dir)) {
-            log.event(`Creating directory: ${dir}`);
-            fs.mkdirSync(path.join(process.cwd(), dir), {
-                recursive: true
-            });
-        };
+    const directory = path.resolve(process.cwd(), logDir);
+
+    fs.mkdirSync(directory, {
+        recursive: true
     });
-    outputFileStream = fs.createWriteStream(path.join(process.cwd(), logDir, `${logFormat}.txt`), { 'flags': 'a' });
+
+    outputFileStream = fs.createWriteStream(path.join(directory, `${logFormat}.txt`), { flags: "a" });
 
     await new Promise((resolve, reject) => {
         const onOpen = () => {
@@ -69,7 +66,11 @@ const loadLogFile = async function () {
  * Log to a file
  * @param {String} text 
  */
-const writeLogFile = async function (text) {
+const writeLogFile = function (text) {
+    if (outputFileStream.writableEnded || outputFileStream.destroyed || outputFileStream.errored) {
+        return;
+    }
+
     outputFileStream.write(`${text}\n`);
 }
 

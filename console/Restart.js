@@ -40,15 +40,21 @@ module.exports = {
                 return false; // This should not run, but like
             case "/rs":
             case "/restart":
-                await gracefulShutdown("Console // Restart", false)
+                const success = await gracefulShutdown("Console // Restart", false)
                 const child = spawn(restart, {
                     detached: true,
                     shell: true,
                     stdio: 'ignore'
                 })
+                child.once("error", (error) => {
+                    console.error("Failed to launch restart command:", error);
+                    process.exit(1);
+                });
                 child.unref()
                 await delay(1000)
-                process.exit(0);
+                if (!success) {
+                    process.exit(1);
+                }
             case "/refresh":
                 await refreshCycle("Console // Refresh")
                 return true;

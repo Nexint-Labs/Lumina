@@ -72,14 +72,28 @@ module.exports = {
                     case 'l':
                     case 'log':
                     case 'logs':
+                        const counts = {
+                            info: getInfo(),
+                            success: getSuccess(),
+                            warn: getWarn(),
+                            error: getError(),
+                            fatal: getFatal(),
+                            event: getEvent()
+                        };
+
+                        let total = 0;
+
+                        for (const count of Object.values(counts)) {
+                            total += count;
+                        }
                         log.info(primary(dashCenter(`Log Info`)))
-                        log.info(`${getInfo() + getSuccess() + getWarn() + getError() + getFatal() + getEvent()} total events.`)
-                        log.info(`${getInfo() - 1} info events.`)
-                        log.info(`${getSuccess()} successful events.`)
-                        log.info(`${getWarn()} warning events.`)
-                        log.info(`${getError()} error events.`)
-                        log.info(`${getFatal()} fatal events.`)
-                        log.info(`${getEvent()} general events.`)
+                        log.info(`${total} total events.`)
+                        log.info(`${counts.info} info events.`)
+                        log.info(`${counts.success} successful events.`)
+                        log.info(`${counts.warn} warning events.`)
+                        log.info(`${counts.error} error events.`)
+                        log.info(`${counts.fatal} fatal events.`)
+                        log.info(`${counts.eent} general events.`)
                         log.info(accent(dashCenter(`Nex ${date.getFullYear()}`)))
                         break;
                     default:

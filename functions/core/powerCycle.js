@@ -43,12 +43,19 @@ const gracefulShutdown = async function (cause, exit) {
 
     try {
 
-        const { readline } = require("#boot");
-        readline.setPrompt("");
-        readline.line = "";
-        readline.cursor = 0;
-        readline.prompt(true);
-        
+        try {
+            const { readline } = require("#boot");
+
+            if (readline && !readline.closed) {
+                readline.setPrompt("");
+                readline.line = "";
+                readline.cursor = 0;
+                readline.prompt(true);
+            }
+        } catch {
+            // Cosmetic failure. Continue graceful shutdown.
+        }
+
         log.info(primary(dashCenter(`Shutdown`)))
         const startShutdown = performance.now()
         log.event(`Shutdown triggered by: ${cause}`)
@@ -250,7 +257,7 @@ const refreshCycle = async function (cause) {
         otherState = false;
         return true;
     } catch (error) {
-        await log.fatal("An unexpected error has happened while reloading.", error, 0x0005, true)
+        await log.fatal("An unexpected error has happened while refreshing.", error, 0x0005, true)
         process.exit(1);
     }
 }

@@ -72,3 +72,7 @@ const execute = async function () {
 module.exports = {
     execute
 }
+
+const { test } = require("node:test");
+
+test("Sample assertions", execute);
