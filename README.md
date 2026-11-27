@@ -1,6 +1,8 @@
 # Lumina
 
-Lightweight Node.js Framework
+Lightweight, zero-dependency Node.js application lifecycle framework.
+
+Documentation for v0.8.2 (development release).
 
 ## What is Lumina?
 
@@ -8,7 +10,7 @@ Lumina is a source-available Node.js framework for developing, hosting and manag
 
 We offer several ways for developers to integrate their applications into Lumina without having to implement their own application lifecycle, module loader, logging system or console interface.
 
-Lumina is designed to be flexible and is not restricted to any particular application type or external library. Developers can use Lumina to host REST APIs, Discord bots, WebSocket clients and servers, background services, or other Node.js applications.
+Lumina is designed to be flexible and is not restricted to any particular application type or external library. Developers can use Lumina to host REST APIs, Discord bots, WebSocket clients and servers, SvelteKit servers, interactive terminal applications, background services, or other Node.js applications.
 
 ## Features
 
@@ -19,7 +21,10 @@ Lumina is designed to be flexible and is not restricted to any particular applic
 - Graceful shutdown, restarting and reloading.
 - Selective module cache persistence.
 - Configurable error handling policies.
-- Integrated logging utilities.
+- Integrated structured logging and prompt-aware raw output.
+- Configurable console prompts and gradient themes.
+- Application and preload health checks.
+- Non-blocking startup update checks and optional periodic checks.
 - Extensible console commands.
 - Environment variable and configuration management.
 - Framework configuration defaults with application-specific overrides.
@@ -48,7 +53,7 @@ Finally, Lumina also powers the Nexint Sonolus Server, used by thousands of peop
 
 The vast majority of code in this project is my own, however AI assisted with pen-testing this program.
 
-This readme was primarily generated with AI.
+This README was primarily generated with AI and updated with AI assistance.
 
 Node.js 24 or later is recommended. Some features may require newer versions of Node.js. Earlier versions have not been tested.
 
@@ -100,16 +105,16 @@ Create a file under `apps/`, such as `apps/example.js`:
 
 ```js
 const { log } = require("@nexint/lumina/core/log.mjs");
-
 module.exports = {
     async execute() {
         log.info("Application started.");
     },
-
-    async reload() {
-        log.info("Application reloaded.");
+    async refresh() {
+        log.info("Application refreshed.");
     },
-
+    async health() {
+        return true; // Replace with an actual readiness check.
+    },
     async close() {
         log.info("Application closed.");
     }
@@ -121,12 +126,15 @@ The following lifecycle methods are supported:
 | Method | Description |
 |---|---|
 | `execute()` | Initializes the application. |
-| `reload()` | Executes application-specific refresh logic. |
+| `refresh()` | Executes application-specific refresh logic. |
+| `health()` | Returns `true` when the application is healthy. |
 | `close()` | Releases resources and shuts down the application. |
 
 Developers are responsible for implementing the behaviour of each lifecycle method. For example, a web server should stop accepting connections and close its server instance when `close()` is called.
 
-Lumina awaits asynchronous lifecycle methods before proceeding with the corresponding lifecycle operation.
+Lumina awaits asynchronous lifecycle methods before proceeding with the corresponding lifecycle operation. Shutdown signals are handled during initialization so an operator can terminate a stalled startup. Implement `close()` so it tolerates partially initialized resources. Graceful shutdown has a 30-second watchdog that escalates to forced shutdown; a synchronously blocked event loop can prevent timers and signal handlers from running.
+
+A reload calls `close()` and then `execute()` on applications and plugins; it does not call a `reload()` hook. Health checks inspect loaded applications and preloads, not plugins. Hooks are optional; components without a health hook are not actively checked.
 
 ### 2. Plugins
 
@@ -138,7 +146,6 @@ Create a file under `plugins/`:
 
 ```js
 const { log } = require("@nexint/lumina/core/log.mjs");
-
 module.exports = {
     async execute() {
         log.info("Plugin successfully loaded.");
@@ -182,15 +189,12 @@ Each console command exposes a `command()` method that receives the input entere
 
 ```js
 const { log } = require("@nexint/lumina/core/log.mjs");
-
 module.exports = {
     async command(input) {
         if (input !== "hello") return false;
-
         log.info("Hello from Lumina!");
         return true;
     },
-
     async help() {
         return ["hello - Displays a greeting."];
     }
@@ -199,7 +203,25 @@ module.exports = {
 
 The `command()` method should return `true` if the command was handled, or `false` if the input does not match the command.
 
-The optional `help()` method provides information about the available command.
+The optional `help()` method returns an array of strings for the paginated help menu. Export `disable: true` to exclude a console module from command dispatch and help. Application console commands are checked before framework commands when consuming Lumina as a dependency.
+
+### Logging and console output
+
+```js
+const { log, print, printErr } = require("@nexint/lumina/core/log.mjs");
+
+log.info("Application ready.");
+log.event("Connecting to service...");
+log.success("Connected.");
+log.warn("Running in development mode.");
+log.error("Request failed.", new Error("Example"));
+print("Raw application output");
+printErr("Raw error output");
+```
+
+`log` provides timestamped severity levels (`info`, `event`, `success`, `warn`, `error`, `fatal`). `log.fatal(message, error, code, shutdown)` is asynchronous; pass `true` for `shutdown` to initiate forced shutdown. `print()` and `printErr()` forward arguments to native console output while preserving the active Lumina prompt, input and cursor on supported interactive terminals. Prefer them for asynchronous application output. Native `console.log()` and `console.error()` remain unchanged. Raw output is not automatically written to Lumina log files.
+
+The `/print logs` command displays log event counts.
 
 ## Directory Structure
 
@@ -250,7 +272,7 @@ Lumina initializes its components in the following order:
 5. Application preload initialization.
 6. Application plugin initialization.
 7. Application initialization.
-8. Initial update checking, console interface and periodic update checking, when enabled.
+8. Start the initial update check without awaiting it, then start console input and optional periodic update checking.
 
 When running Lumina as a standalone framework, framework and application directories are treated as the same directories and are not initialized twice.
 
@@ -297,13 +319,20 @@ Lumina provides several built-in console commands for managing application lifec
 | `/refresh` | Clears selected module caches and invokes application `refresh()` methods. |
 | `/reload` | Closes applications and plugins, clears selected module caches and initializes them again. |
 | `/restart` | Shuts down the current instance and launches the configured restart command. |
-| `/stop` | Shuts down the current instance. |
+| `/stop` | Shuts down the current instance (`/end`, `/shutdown`). |
+| `/health` | Checks loaded application and preload health hooks. |
+| `/help [page]` | Displays paginated console help (`/h`). |
+| `/print version` | Displays version information. |
+| `/print build` | Displays build information. |
+| `/print logs` | Displays log event counts. |
 
 Refresh and reload operations may also invalidate framework module caches, allowing developers to work on Lumina itself.
 
 Refreshing and reloading are experimental features. Existing module references may remain unchanged, and ECMAScript modules cannot be reliably reloaded through CommonJS cache invalidation.
 
-A full restart is recommended when updating the framework, persistent modules or ECMAScript modules.
+A full restart is recommended when updating the framework, persistent modules or ECMAScript modules. `/restart` (alias `/rs`) launches the configured shell command after shutdown; provide the appropriate startup script for your environment.
+
+Lifecycle operations are also available programmatically through `@nexint/lumina/power`: `gracefulShutdown(cause, exit)`, `reload(cause)`, `refreshCycle(cause)` and `healthCheck(cause, quiet = false)`. Avoid overlapping lifecycle operations, including health checks.
 
 ## Configuration
 
@@ -313,7 +342,6 @@ Configuration should be accessed using the `getConfig()` utility:
 
 ```js
 const { getConfig } = require("@nexint/lumina/core/getConfig");
-
 const { verbose, devMode } = getConfig("core/core");
 ```
 
@@ -323,7 +351,8 @@ The following built-in configurations are available:
 |---|---|
 | `core/core` | Framework behaviour and error handling. |
 | `core/log` | Logging configuration. |
-| `cosmetic/config` | Application name and version information. |
+| `cosmetic/config` | Application metadata, theme and console prompt. |
+| `cosmetic/tips` | Startup tips. |
 
 For example, an application may create `config/core/core.js`:
 
@@ -335,6 +364,26 @@ module.exports = {
 ```
 
 Lumina merges these values with the default framework configuration. Applications do not need to copy the entire framework configuration.
+
+For a custom prompt and theme, create `config/cosmetic/config.js`:
+
+```js
+module.exports = {
+    pluginName: "My App",
+    pluginVer: "1.0.0",
+    consolePrompt: "MyApp@Lumina > ",
+    theme: {
+        primary: "#00FFFF",
+        secondary: "#FF00FF",
+        accent: "#FF66CC",
+        accentSecondary: "#66CCFF"
+    }
+};
+```
+
+The prompt inherits the configured primary gradient. The `theme` object should include all four colors when overridden.
+
+The initial update check runs asynchronously even when `autoUpdate` is false; that setting disables periodic checks only. Periodic checks run approximately hourly. Update comparisons use numeric framework revision IDs, not semantic-version ordering.
 
 Configuration merging is shallow. Overriding a nested object replaces that object rather than merging its individual properties.
 
@@ -403,6 +452,10 @@ Lumina provides configurable error handling policies through its core configurat
 | `warn` | Logs the error and attempts to continue. |
 | `continue` | Suppresses the affected framework error and attempts to continue. |
 | `shutdown` | Initiates framework shutdown for errors where this policy applies. |
+
+The default policies are `uncaughtException: "shutdown"`, `unhandledRejection: "warn"` and `healthPolicy: "warn"`. When overriding `errorPolicy`, supply the complete nested object. Non-fatal loading policies may allow startup to finish even if a component fails.
+
+Developer evaluation and execution commands are disabled by default and require both `devMode` and `allowEval` to be enabled. Do not enable them in untrusted environments.
 
 Developers should still implement appropriate application-specific error handling.
 
