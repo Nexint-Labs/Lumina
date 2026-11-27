@@ -1,5 +1,5 @@
 module.exports = {
-    devMode: true, // Determines dev mode?
+    devMode: false, // Determines dev mode?
     devMsg: "Dev mode is enabled.",
     devName: "Nexint",
     dateOptions: {
@@ -26,5 +26,5 @@ module.exports = {
         healthPolicy: "warn"
     },
 
-    allowEval: true // PLEASE DO NOT ALLOW EVAL HELP
+    allowEval: false // PLEASE DO NOT ALLOW EVAL HELP
 }
