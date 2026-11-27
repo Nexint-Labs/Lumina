@@ -1,6 +1,6 @@
 module.exports = {
     devMode: false, // Determines dev mode?
-    devMsg: "This bot is running in dev mode. Developer functions are enabled.",
+    devMsg: "Dev mode is enabled.",
     devName: "Nexint",
     dateOptions: {
         hour: "numeric",
@@ -24,5 +24,7 @@ module.exports = {
         uncaughtException: "shutdown",
         unhandledRejection: "warn",
         healthPolicy: "warn"
-    }
+    },
+
+    allowEval: false // PLEASE DO NOT ALLOW EVAL HELP
 }

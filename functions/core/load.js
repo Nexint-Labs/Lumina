@@ -125,7 +125,7 @@ const load = async function (dir, root) {
 const loadConsole = async function (dir, command, root) {
 
     const loadConsoleHelper = async (plugin, file) => {
-        if ('command' in plugin) {
+        if ('command' in plugin && plugin.disable !== true) {
             const validCommand = await plugin.command(command);
 
             if (verbose) {
@@ -154,7 +154,7 @@ const loadHelp = async function (dir, root) {
     let helpArray = [];
 
     const loadHelpHelper = async (plugin) => {
-        if ('help' in plugin) {
+        if ('help' in plugin && plugin.disable !== true) {
             helpArray = helpArray.concat(await plugin.help());
         }
     }

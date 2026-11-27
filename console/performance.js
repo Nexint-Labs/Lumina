@@ -1,5 +1,5 @@
 const { date } = require('#functions/core/date');
-const { center, bar, primary, accent } = require('#functions/core/gradient');
+const { center, bar, primary, accent, dashCenter } = require('#functions/core/gradient');
 const { log } = require('#functions/core/log.mjs');
 const { cpuPerf, memPerf, eventPerf } = require('#preload/core/perf');
 
@@ -31,28 +31,28 @@ module.exports = {
                 }
                 switch (print) {
                     case "cpu":
-                        log.info(primary(`------------------- Perf Metrics -------------------`))
+                        log.info(primary(dashCenter(`Perf Metrics`)))
                         await cpuPerf(false)
-                        log.info(accent(`--------------------- Nex ${date.getFullYear()} ---------------------`))
+                        log.info(accent(dashCenter(`Nex ${date.getFullYear()}`)))
                         break;
                     case "mem":
                     case "ram":
                     case 'memory':
-                        log.info(primary(`------------------- Perf Metrics -------------------`))
+                        log.info(primary(dashCenter(`Perf Metrics`)))
                         await memPerf(false)
-                        log.info(accent(`--------------------- Nex ${date.getFullYear()} ---------------------`))
+                        log.info(accent(dashCenter(`Nex ${date.getFullYear()}`)))
                         break;
                     case "event":
                     case 'loop':
-                        log.info(primary(`------------------- Perf Metrics -------------------`))
+                        log.info(primary(dashCenter(`Perf Metrics`)))
                         await eventPerf(false)
-                        log.info(accent(`--------------------- Nex ${date.getFullYear()} ---------------------`))
+                        log.info(accent(dashCenter(`Nex ${date.getFullYear()}`)))
                         break;
                     case undefined:
                     case "":
                     case 'sum':
                     case 'summary':
-                        log.info(primary(`------------------- Perf Metrics -------------------`))
+                        log.info(primary(dashCenter(`Perf Metrics`)))
                         const cpu = await cpuPerf();
                         const mem = await memPerf();
                         const event = await eventPerf();
@@ -67,7 +67,7 @@ module.exports = {
 
                         log.info(center(`Event Loop: ${(event.utilization * 100).toFixed(2)}%`));
                         log.info(center(bar(event.utilization * 100)));
-                        log.info(accent(`--------------------- Nex ${date.getFullYear()} ---------------------`))
+                        log.info(accent(dashCenter(`Nex ${date.getFullYear()}`)))
                         break;
                     default:
                         return false;

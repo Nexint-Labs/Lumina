@@ -28,7 +28,8 @@ if (!process.env.PRISM_LOG_FORMAT) {
 const { log, setReadline, print } = require('#functions/core/log.mjs');
 
 log.event(`Loading configs...`)
-const { autoUpdate, errorPolicy } = getConfig("core/core");
+const { autoUpdate, errorPolicy, devMode, devMsg } = getConfig("core/core");
+const { tips } = getConfig("cosmetic/tips");
 const { frameVer, frameName } = require('#config/core/framework');
 const { load, loadConsole } = require('#functions/core/load');
 const delay = require("#functions/core/delay");
@@ -40,7 +41,7 @@ const { gracefulShutdown } = require('#functions/core/powerCycle');
 
 // Prepare the console
 const readline = require("node:readline/promises");
-const { center, primary, accent, lumeAccent, lumePrimary } = require("#functions/core/gradient");
+const { center, primary, accent, lumeAccent, lumePrimary, dashCenter } = require("#functions/core/gradient");
 const { forceShutdown } = require("#functions/core/fatalShutdown.mjs");
 const rl = readline.createInterface({
     input: process.stdin,
@@ -162,12 +163,17 @@ const main = async () => {
     // This makes my API super modular :)
     await load("apps", root);
 
-    log.info(primary(`--------------------- Welcome! ---------------------`))
+    log.info(primary(dashCenter("Welcome!")))
     log.info(center(`Welcome to ${lumeAccent(frameName)}`));
     log.info(center(`You're running version: ${lumeAccent(frameVer)}`));
     log.info(center("Stay up to date for the best features."));
     log.info(center(`Run ${lumeAccent("/help")} to get started!`));
-    log.info(accent(`--------------------- Nex ${date.getFullYear()} ---------------------`))
+    if (devMode) {
+        log.info(center(devMsg));
+    } else if (tips.length) {
+        log.info(center(`Tip: ${tips[Math.floor(Math.random() * tips.length)]}`));
+    }
+    log.info(accent(dashCenter(`Nex ${date.getFullYear()}`)))
     const elapsed = performance.now() - start;
 
     if (elapsed < 1000) {
@@ -224,7 +230,7 @@ const commandParser = async () => {
             // why am i doing this
             log.info("This command is not valid.")
             log.info("Tip: Run /help to see all commands!")
-            
+
             continue;
         }
 

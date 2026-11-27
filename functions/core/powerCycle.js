@@ -5,7 +5,7 @@ const { close, refresh, load, health } = require("./load");
 const { log } = require("./log.mjs");
 const { root, frameworkDir, standalone } = require("#functions/core/dirs");
 const { frameName } = require("#config/core/framework");
-const { primary, accent } = require("./gradient");
+const { primary, accent, dashCenter } = require("./gradient");
 const { errorPolicy } = getConfig("core/core");
 const { pluginName } = getConfig("cosmetic/config");
 
@@ -42,7 +42,7 @@ const gracefulShutdown = async function (cause, exit) {
     }, 30_000);
 
     try {
-        log.info(primary(`--------------------- Shutdown ---------------------`))
+        log.info(primary(dashCenter(`Shutdown`)))
         const startShutdown = performance.now()
         log.event(`Shutdown triggered by: ${cause}`)
         log.event("Closing all apps...")
@@ -79,7 +79,7 @@ const gracefulShutdown = async function (cause, exit) {
         } else {
             log.success(`Shut down in ${(elapsed / 1000).toFixed(3)}s.`);
         }
-        log.info(accent(`--------------------- Nex ${date.getFullYear()} ---------------------`))
+        log.info(accent(dashCenter(`Nex ${date.getFullYear()}`)))
         clearTimeout(watchdog);
         shutDownState = false;
         if (exit) {
@@ -109,7 +109,7 @@ const reload = async function (cause) {
     }
     otherState = true;
     try {
-        log.info(primary(`---------------------- Reload ----------------------`))
+        log.info(primary(dashCenter(`Reload`)))
         const startReload = performance.now()
         log.event(`Reload triggered by: ${cause}`)
 
@@ -180,7 +180,7 @@ const reload = async function (cause) {
         }
         log.warn("Note: Reloading is unstable and not fully supported.")
         log.warn("If things don't work, restart.")
-        log.info(accent(`--------------------- Nex ${date.getFullYear()} ---------------------`))
+        log.info(accent(dashCenter(`Nex ${date.getFullYear()}`)))
         otherState = false;
         return true;
     } catch (error) {
@@ -201,7 +201,7 @@ const refreshCycle = async function (cause) {
     }
     otherState = true;
     try {
-        log.info(primary(`------------------- Refresh Apps -------------------`))
+        log.info(primary(dashCenter(`Refresh Apps`)))
         const startRefresh = performance.now()
         log.event(`Refresh triggered by: ${cause}`)
 
@@ -239,7 +239,7 @@ const refreshCycle = async function (cause) {
         // Cleanup
         log.warn("Note: Refreshing is unstable and not fully supported.")
         log.warn("If things don't work, restart or reload.")
-        log.info(accent(`--------------------- Nex ${date.getFullYear()} ---------------------`))
+        log.info(accent(dashCenter(`Nex ${date.getFullYear()}`)))
         otherState = false;
         return true;
     } catch (error) {
@@ -267,7 +267,7 @@ const healthCheck = async function (cause, quiet = false) {
         const startHealth = performance.now()
 
         if (!quiet) {
-            log.info(primary(`---------------------- Health ----------------------`))
+            log.info(primary(dashCenter(`Health`)))
             log.event(`Health check triggered by: ${cause}`)
         }
 
@@ -327,7 +327,7 @@ const healthCheck = async function (cause, quiet = false) {
         // Cleanup
 
         if (!quiet) {
-            log.info(accent(`--------------------- Nex ${date.getFullYear()} ---------------------`))
+            log.info(accent(dashCenter(`Nex ${date.getFullYear()}`)))
         }
         healthState = false
         return success;

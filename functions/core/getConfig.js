@@ -22,6 +22,12 @@ const { root, frameworkDir, standalone } = require("./dirs");
 
 /**
  * @overload
+ * @param {"cosmetic/tips"} name
+ * @returns {typeof import("../../config/cosmetic/tips")}
+ */
+
+/**
+ * @overload
  * @param {string} name
  * @returns {Record<string, any>}
  */

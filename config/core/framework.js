@@ -4,7 +4,7 @@
 const { version } = require("../../package.json");
 
 module.exports = {
-    frameName: "Lumina ☆", // Framework Name
+    frameName: "Lumina", // Framework Name
     frameVer: `${version}`, // Version of the bot
     frameID: 26, // Framework version ID
     updateURL: "https://github.com/Nexint-Labs/Lumina/",

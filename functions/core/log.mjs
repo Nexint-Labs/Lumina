@@ -12,24 +12,43 @@ import { clearLine, cursorTo } from "node:readline";
 let rl = null;
 
 /**
- * Register the readline interface.
+ * @type {Function | null}
+ */
+let closeHandler = null;
+
+/**
+ * Register or detach the readline interface.
  * @param {import("node:readline").Interface | null} instance
  */
 const setReadline = function (instance) {
-    rl = instance;
+    instance = instance?.closed ? null : instance;
 
-    if (instance) {
-        instance.once("close", () => {
-            if (rl === instance) {
-                if (process.stdout.isTTY) {
-                    clearLine(process.stdout, 0);
-                    cursorTo(process.stdout, 0);
-                }
+    // Avoid registering the same interface twice.
+    if (rl === instance) return;
 
-                rl = null;
-            }
-        });
+    // Remove the cleanup listener from the previous interface.
+    if (rl && closeHandler) {
+        rl.removeListener("close", closeHandler);
     }
+
+    rl = instance;
+    closeHandler = null;
+
+    if (!instance) return;
+
+    closeHandler = function () {
+        if (rl !== instance) return;
+
+        if (process.stdout.isTTY) {
+            clearLine(process.stdout, 0);
+            cursorTo(process.stdout, 0);
+        }
+
+        rl = null;
+        closeHandler = null;
+    };
+
+    instance.once("close", closeHandler);
 };
 
 /**

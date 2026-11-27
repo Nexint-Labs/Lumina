@@ -64,6 +64,19 @@ const center = function (text, width = 52) {
     return " ".repeat(Math.floor(padding / 2)) + text + " ".repeat(Math.ceil(padding / 2));
 }
 
+/**
+ * The little helper for idk real
+ * @param {String} text 
+ * @param {Number} width 
+ * @returns {String}
+ */
+const dashCenter = function (text, width = 52) {
+    const length = stripVTControlCharacters(text).length;
+    const padding = Math.max(1, width - length);
+
+    return "-".repeat(Math.floor(padding / 2) - 1) + ` ${text} ` + "-".repeat(Math.ceil(padding / 2) - 1);
+}
+
 const primary = function(text){
     return gradient(text, theme.primary, theme.secondary)
 }
@@ -80,4 +93,4 @@ const lumeAccent = function(text){
     return gradient(text, lumeTheme.accent, lumeTheme.accentSecondary)
 }
 
-module.exports = { gradient, bar, center, primary, accent, lumePrimary, lumeAccent };
+module.exports = { gradient, bar, center, primary, accent, lumePrimary, lumeAccent, dashCenter };

@@ -4,7 +4,7 @@ const { pluginName, pluginVer } = getConfig("cosmetic/config");
 const { date } = require('#functions/core/date');
 const { log, getInfo, getSuccess, getWarn, getError, getFatal, getEvent } = require('#functions/core/log.mjs');
 const { getUpdateVersion } = require('#functions/core/update');
-const { primary, accent, lumeAccent } = require('#functions/core/gradient');
+const { primary, accent, lumeAccent, dashCenter, lumePrimary } = require('#functions/core/gradient');
 const { pluralValues } = require('#functions/core/pluralValues');
 
 module.exports = {
@@ -33,7 +33,7 @@ module.exports = {
                     case "v":
                     case "ver":
                     case 'version':
-                        log.info(primary(`------------------- Version Info -------------------`))
+                        log.info(primary(dashCenter(`Version Info`)))
                         const [, latestVersion] = await getUpdateVersion() || [];
                         log.info("Printing the version...")
                         if (pluginName === "N/A") {
@@ -42,7 +42,7 @@ module.exports = {
                             log.info(`${primary(pluginName)} Version: ${primary(pluginVer)}`)
                         }
                         if (latestVersion !== undefined) {
-                            log.info(`${lumeAccent(frameName)} Version: ${lumeAccent(frameVer)} (Version ID: ${frameID}) / Latest version ID: ${latestVersion}.`)
+                            log.info(`${lumeAccent(frameName)} Version: ${lumeAccent(frameVer)} (ID: ${frameID} / Latest: ${latestVersion}).`)
                         } else {
                             log.info(`${lumeAccent(frameName)} Version: ${lumeAccent(frameVer)}.`)
                         }
@@ -55,11 +55,11 @@ module.exports = {
                         } else {
                             log.info(`Running the latest version.`)
                         }
-                        log.info(accent(`--------------------- Nex ${date.getFullYear()} ---------------------`))
+                        log.info(accent(dashCenter(`Nex ${date.getFullYear()}`)))
                         break;
                     case "b":
                     case 'build':
-                        log.info(primary(`-------------------- Build Info --------------------`))
+                        log.info(primary(dashCenter(`Build Info`)))
                         log.info(`Printing the build!`)
                         if (pluginName === "N/A") {
                             log.info(`No apps installed.`)
@@ -67,12 +67,12 @@ module.exports = {
                             log.info(`${primary(pluginName)} v${primary(pluginVer)}`)
                         }
                         log.info(`${lumeAccent(frameName)} v${lumeAccent(frameVer)}`)
-                        log.info(accent(`--------------------- Nex ${date.getFullYear()} ---------------------`))
+                        log.info(accent(dashCenter(`Nex ${date.getFullYear()}`)))
                         break;
                     case 'l':
                     case 'log':
                     case 'logs':
-                        log.info(primary(`--------------------- Log Info ---------------------`))
+                        log.info(primary(dashCenter(`Log Info`)))
                         log.info(`${getInfo() + getSuccess() + getWarn() + getError() + getFatal() + getEvent()} total events.`)
                         log.info(`${getInfo() - 1} info events.`)
                         log.info(`${getSuccess()} successful events.`)
@@ -80,7 +80,7 @@ module.exports = {
                         log.info(`${getError()} error events.`)
                         log.info(`${getFatal()} fatal events.`)
                         log.info(`${getEvent()} general events.`)
-                        log.info(accent(`--------------------- Nex ${date.getFullYear()} ---------------------`))
+                        log.info(accent(dashCenter(`Nex ${date.getFullYear()}`)))
                         break;
                     default:
                         return false;

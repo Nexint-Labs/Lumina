@@ -15,7 +15,7 @@ const { loadHelp } = require("#functions/core/load");
 const { log } = require('#functions/core/log.mjs');
 const { gracefulShutdown, refreshCycle, reload, healthCheck } = require('#functions/core/powerCycle');
 const { spawn } = require('child_process');
-const { primary, accent, lumeAccent } = require('#functions/core/gradient');
+const { primary, accent, lumeAccent, dashCenter } = require('#functions/core/gradient');
 
 module.exports = {
     // Example of a help menu given by the bot.
@@ -46,17 +46,18 @@ module.exports = {
             case "/h":
             case "/help":
 
-                let helpMenu = await loadHelp("console", frameworkDir);
-
+                let helpMenu = []
                 if (!standalone) {
                     helpMenu = helpMenu.concat(await loadHelp("console", root));
                 }
+
+                helpMenu = await loadHelp("console", frameworkDir);
 
                 // Help Menu
                 let page;
                 if (command.split(" ")[1] != undefined) {
                     page = Number(parseInt(command.split(" ")[1].toLowerCase(), 10));
-                    if (isNaN(page) || page < 1) {
+                    if (!Number.isSafeInteger(page) || page < 1) {
                         page = 1;
                     }
                 } else {
@@ -64,11 +65,7 @@ module.exports = {
                 }
 
                 // forced symmetry get nuked
-                if (page < 10) {
-                    log.info(primary(`----------------- Help menu: (${page}/${Math.ceil((helpMenu.length) / 8)}) -----------------`))
-                } else {
-                    log.info(primary(`----------------- Help menu: (N/A) -----------------`))
-                }
+                log.info(primary(dashCenter(`Help menu: (${page}/${Math.ceil((helpMenu.length) / 8)})`)))
 
                 let countHelp = 0;
                 for (let i = (page - 1) * 8; i < Math.min(8 + ((page - 1) * 8), helpMenu.length); i++) {
@@ -78,7 +75,7 @@ module.exports = {
                 if (countHelp == 0) {
                     log.info("How did you get here?")
                 }
-                log.info(accent(`--------------------- Nex ${date.getFullYear()} ---------------------`))
+                log.info(accent(dashCenter(`Nex ${date.getFullYear()}`)))
                 return true;
             case "/info":
                 let info;
@@ -102,7 +99,7 @@ module.exports = {
                 ];
                 if (command.split(" ")[1] != undefined) {
                     info = Number(parseInt(command.split(" ")[1].toLowerCase(), 10));
-                    if (isNaN(info) || info < 1) {
+                    if (!Number.isSafeInteger(info) || info < 1) {
                         info = 1;
                     }
                 } else {
@@ -110,11 +107,7 @@ module.exports = {
                 }
 
                 // forced symmetry get nuked
-                if (info < 10) {
-                    log.info(primary(`----------------- Info menu: (${info}/${Math.ceil((infoList.length) / 8)}) -----------------`))
-                } else {
-                    log.info(primary(`----------------- Info menu: (N/A) -----------------`))
-                }
+                log.info(primary(dashCenter(`Info menu: (${info}/${Math.ceil((infoList.length) / 8)})`)))
 
                 let countInfo = 0;
                 for (let i = (info - 1) * 8; i < Math.min(8 + ((info - 1) * 8), infoList.length); i++) {
@@ -124,7 +117,7 @@ module.exports = {
                 if (countInfo == 0) {
                     log.info("How did you get here?")
                 }
-                log.info(accent(`--------------------- Nex ${date.getFullYear()} ---------------------`))
+                log.info(accent(dashCenter(`Nex ${date.getFullYear()}`)))
                 return true;
             case "/end":
             case "/stop":
