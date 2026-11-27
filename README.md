@@ -369,15 +369,16 @@ For a custom prompt and theme, create `config/cosmetic/config.js`:
 
 ```js
 module.exports = {
-    pluginName: "My App",
-    pluginVer: "1.0.0",
+    appName: "My App",
+    appVer: "1.0.0",
     consolePrompt: "MyApp@Lumina > ",
     theme: {
         primary: "#00FFFF",
         secondary: "#FF00FF",
         accent: "#FF66CC",
         accentSecondary: "#66CCFF"
-    }
+    },
+    spacing: 1
 };
 ```
 

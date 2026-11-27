@@ -1,9 +1,3 @@
-// Sample code to import a client and other constants.
-/*
-const { restart } = require('../../config.js');
-const { helpMenu, readline, spawn, exitHandler, server } = require('../../index.js');
-const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
-*/
 const { frameName } = require('#config/core/framework');
 const { getConfig } = require("#functions/core/getConfig");
 const { restart } = getConfig("core/core");

@@ -4,7 +4,7 @@ const { frameName, frameVer, frameID, updateSource, updateURL } = require('#conf
 const { accent, lumeAccent } = require("./gradient");
 
 /**
- * Gets the latest version of this Lumina!
+ * Gets the latest version of Lumina!
  * @returns 
  */
 const getUpdateVersion = async function () {

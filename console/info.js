@@ -1,4 +1,3 @@
-// Sample code to import a client and other constants.
 const { frameName } = require('#config/core/framework');
 const { getConfig } = require("#functions/core/getConfig");
 const { appName } = getConfig("cosmetic/config");
@@ -74,7 +73,7 @@ module.exports = {
                     'not updated as often, and may be unstable.',
                     'What means what?',
                     `${lumeAccent(frameName)} version is the version of the NodeJS framework.`,
-                    `${appName} version is the version of the plugins / deployment.`,
+                    `${appName} version is the version of the app.`,
                     'Dev is the dev instance, prod is the prod instance.',
                     'Disclaimers:',
                     'Third party plugins are not guaranteed to be supported.',
