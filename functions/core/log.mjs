@@ -16,11 +16,32 @@ let rl = null;
 let closeHandler = null;
 
 /**
+ * @type {String | null}
+ */
+let logState = null
+
+/**
+ * Spacing seperator between info types
+ * @param {String} type 
+ */
+const logSpace = function (type) {
+    if (logState != null && logState !== type) {
+        print();
+    }
+    logState = type;
+}
+
+/**
  * Register or detach the readline interface.
  * mr chatgpt over here made this method and that has some wack conventions ok
  * @param {import("node:readline").Interface | null} instance
  */
 const setReadline = function (instance) {
+
+    
+    if (logState != null && logState !== "info") {
+        logState = "info"
+    }
 
     // normalization
     if (instance?.closed) {
@@ -100,6 +121,7 @@ const log = {
      * @param {String} text 
      */
     info: function (text) {
+        logSpace("info");
         print(`[INFO] [${DateFormatter.format(Date.now())}] ${text}`);
         infoCount += 1;
     },
@@ -109,6 +131,7 @@ const log = {
      * @param {String} text 
      */
     success: function (text) {
+        logSpace("success");
 
         const message = `[SUCCESS] [${DateFormatter.format(Date.now())}] ${text}`;
 
@@ -122,6 +145,7 @@ const log = {
      * @param {String} text 
      */
     event: function (text) {
+        logSpace("event");
 
         const message = `[EVENT] [${DateFormatter.format(Date.now())}] ${text}`
 
@@ -135,6 +159,7 @@ const log = {
      * @param {String} text 
      */
     warn: function (text) {
+        logSpace("warn");
 
         const message = `[WARN] [${DateFormatter.format(Date.now())}] ${text}`
 
@@ -149,6 +174,7 @@ const log = {
      * @param {Error} error 
      */
     error: function (text, error) {
+        logSpace("error");
 
         const message = `[ERROR] [${DateFormatter.format(Date.now())}] ${text}`;
 
@@ -176,6 +202,7 @@ const log = {
      * @param {Boolean} shutdown 
      */
     fatal: async function (text, error, code = 0x0000, shutdown = false) {
+        logSpace("fatal");
 
         if (shutdown && rl && !rl.closed) {
             rl.line = "";
