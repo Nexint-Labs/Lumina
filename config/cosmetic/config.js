@@ -11,6 +11,7 @@ module.exports = {
     spacing: 1, // Readability update. Spacing :)
 
     // Legacy, remove "later" (never)
-    pluginName: appName,
-    pluginVer: appVer,
+    // Some old code may rely on this. If it does, you know what happened :)
+    pluginName: "N/A",
+    pluginVer: "N/A",
 }

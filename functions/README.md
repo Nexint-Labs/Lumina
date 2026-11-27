@@ -1,3 +1,3 @@
 # Functions
 
-This lists the functions that this server relies on lol
+This lists the functions that Lumina relies on lol
