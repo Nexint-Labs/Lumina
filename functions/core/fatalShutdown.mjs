@@ -6,7 +6,6 @@ import fs from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
 import dirs from "#functions/core/dirs";
-import { clearLine, cursorTo } from "node:readline";
 
 const { root, frameworkDir, standalone } = dirs;
 
@@ -137,13 +136,17 @@ const forceShutdown = async function (cause) {
         }
         process.exit(1);
     }, SHUTDOWN_TIMEOUT);
+
     try {
-        if (process.stdout.isTTY) {
-            clearLine(process.stdout, 0);
-            cursorTo(process.stdout, 0);
+        const { readline } = require("#boot");
+        if (readline && !readline.closed) {
+            readline.line = "";
+            readline.cursor = 0;
+            readline.setPrompt("");
+            readline.prompt(true);
         }
     } catch {
-        // no prompt get nuked
+        // Cosmetic failure. Continue emergency shutdown.
     }
 
     log.info(`\x1b[36m------------------ Force Shutdown ------------------\x1b[0m`)

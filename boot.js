@@ -49,7 +49,15 @@ const rl = readline.createInterface({
     output: process.stdout,
     prompt: primary(consolePrompt)
 });
-const prompt = () => rl.question(rl.getPrompt());
+const prompt = async () => {
+    setReadline(rl);
+
+    try {
+        return await rl.question(rl.getPrompt());
+    } finally {
+        setReadline(null);
+    }
+};
 
 // Start loading
 const startLoad = Date.now();
@@ -146,9 +154,9 @@ const init = async function () {
     }
 
     // Sigint / Sigterm / Sighup (real)
-    process.on('SIGINT', async () => {
-        await gracefulShutdown("Ctrl-C", true)
-    })
+    process.on("SIGINT", async () => {
+        await gracefulShutdown("Ctrl-C", true);
+    });
     process.on('SIGTERM', async () => {
         await gracefulShutdown("OS Termination", true)
     })
@@ -228,7 +236,6 @@ init().catch(async error => {
  * These functions are deliberately async'd
  */
 const asyncFunctions = async function () {
-    setReadline(rl);
     commandParser();
     if (autoUpdate) {
         autoUpdateCheck();

@@ -56,44 +56,9 @@ const setReadline = function (instance) {
     instance.once("close", closeHandler);
 };
 
-/**
- * Print Helper lol
- * @param {Function} output 
- * @param  {...any} args 
- */
-const printHelper = function (output, ...args) {
-    const interactive = rl && !rl.closed && process.stdout.isTTY;
-
-    if (!interactive) {
-        output(...args);
-        return;
-    }
-
-    const prompt = rl.getPrompt();
-    const line = rl.line;
-    const cursor = rl.cursor;
-
-    // Let readline erase its own rendering.
-    rl.setPrompt("");
-    rl.write(null, { ctrl: true, name: "e" });
-    rl.write(null, { ctrl: true, name: "u" });
-
-    output(...args);
-
-    // Restore the prompt and input.
-    rl.setPrompt(prompt);
-    rl.prompt();
-    rl.write(line);
-
-    // Restore the original cursor position.
-    for (const _ of line.slice(cursor)) {
-        rl.write(null, { name: "left" });
-    }
-};
-
 // Helper functions
-const print = (...args) => printHelper(console.log, ...args);
-const printErr = (...args) => printHelper(console.error, ...args);
+const print = (...args) => console.log(...args);
+const printErr = (...args) => console.error(...args);
 
 const DateFormatter = new Intl.DateTimeFormat(undefined, dateOptions)
 let infoCount = 0;
@@ -186,6 +151,14 @@ const log = {
      * @param {Boolean} shutdown 
      */
     fatal: async function (text, error, code = 0x0000, shutdown = false) {
+
+        if (shutdown && rl && !rl.closed) {
+            rl.line = "";
+            rl.cursor = 0;
+            rl.setPrompt("");
+            rl.prompt(true);
+            setReadline(null);
+        }
 
         const timestamp = DateFormatter.format(Date.now());
 
