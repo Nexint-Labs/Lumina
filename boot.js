@@ -220,7 +220,7 @@ const main = async () => {
 
     print("Server is running.")
 
-    await updateCheck(true)
+    updateCheck(true)
 
     // real?
     await asyncFunctions();

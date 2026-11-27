@@ -32,10 +32,10 @@ const getUpdateVersion = async function () {
         const versionName = result
 
         // isNan?
-        if (!Number.isNaN(version)) {
+        if (Number.isSafeInteger(version) && version > 0) {
             return [versionName, version]
         } else {
-            throw new Error("Not a Number.")
+            throw new Error("Not a (valid) number.")
         }
     } catch (error) {
         log.error("An error happened while trying to check for updates!")
@@ -63,14 +63,15 @@ const updateCheck = async function (initial) {
         log.warn(`You're running an outdated version of ${lumeAccent(frameName)}! (You are ${latestVersion - frameID} revisions behind)`)
         log.warn(`Update now at ${updateURL} to make sure that ${lumeAccent(frameName)} has the latest security fixes!`)
         if ((latestVersion - frameID) >= 5) {
-            log.warn(`You are over 5 revisions behind. Update to the latest version as soon as possible.`)
+            log.warn(`You are 5 or more revisions behind. Update to the latest version as soon as possible.`)
         }
         log.warn(`Current version: v${frameVer} / Latest Version: ${versionName}`)
-    } else if (latestVersion <= 0) {
-        log.warn(`This instance of ${lumeAccent(frameName)} is fetching an invalid version.`)
     } else if (frameID > latestVersion) {
         log.warn(`You're running an experimental version of ${lumeAccent(frameName)}! (You are ${frameID - latestVersion} revisions ahead)`)
         log.warn(`Here be dragons!~`)
+        if ((frameID - latestVersion) >= 5) {
+            log.warn(`You are 5 or more revisions ahead. This version is in active development.`)
+        }
         log.warn(`Current version: v${frameVer} / Latest Version: ${versionName}`)
     } else if (initial) {
         log.info(`You're running the latest version of ${lumeAccent(frameName)}!`)
